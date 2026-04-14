@@ -2,6 +2,23 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<style>
+  body { display: none; }
+</style>
+
+<script>
+  const correctPassword = "georgetown"; // 원하는 비밀번호로 바꿔
+
+  let userInput = prompt("PXV Dashboard Access - Enter password:");
+
+  if (userInput === correctPassword) {
+    document.addEventListener("DOMContentLoaded", function () {
+      document.body.style.display = "block";
+    });
+  } else {
+    document.write("<h1 style='text-align:center;margin-top:20%;'>Access Denied</h1>");
+  }
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PXV — Multifamily Market Map</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
