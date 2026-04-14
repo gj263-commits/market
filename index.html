@@ -193,14 +193,18 @@ function computeScores() {
   return MSAS.map((_,i) => INDICATORS.reduce((sum,ind) => sum + ind.weight * ind.scores[i], 0) / (total * 100));
 }
 function computeAttractiveness() {
-  const idx = [0,1,2,3,4,5,6,7];
-  const total = idx.reduce((s,i) => s + INDICATORS[i].weight, 0) || 1;
-  return MSAS.map((_,mi) => idx.reduce((sum,i) => sum + INDICATORS[i].weight * INDICATORS[i].scores[mi], 0) / total);
+  const totalW = INDICATORS.reduce((s,d) => s + d.weight, 0) || 1;
+  const denom = totalW / 2;
+  return MSAS.map((_,mi) =>
+    ATTR_IDX.reduce((sum,i) => sum + INDICATORS[i].weight * INDICATORS[i].scores[mi], 0) / denom
+  );
 }
 function computeDistress() {
-  const idx = [8,9,10,11,12,13];
-  const total = idx.reduce((s,i) => s + INDICATORS[i].weight, 0) || 1;
-  return MSAS.map((_,mi) => idx.reduce((sum,i) => sum + INDICATORS[i].weight * INDICATORS[i].scores[mi], 0) / total);
+  const totalW = INDICATORS.reduce((s,d) => s + d.weight, 0) || 1;
+  const denom = totalW / 2;
+  return MSAS.map((_,mi) =>
+    DIST_IDX.reduce((sum,i) => sum + (100 - INDICATORS[i].scores[mi]) * INDICATORS[i].weight, 0) / denom
+  );
 }
 function getTier(rank) {
   return rank <= 5 ? 'Tier 1' : rank <= 18 ? 'Tier 2' : 'Tier 3';
