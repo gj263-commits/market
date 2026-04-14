@@ -13,8 +13,6 @@ header h1{font-size:17px;font-weight:600}
 header p{font-size:12px;color:#90a4ae;margin-top:3px}
 .logo{font-size:22px;font-weight:700;color:#4fc3f7;letter-spacing:1px}
 .body{display:flex;flex:1;overflow:hidden;height:calc(100vh - 62px)}
-
-/* SIDEBAR */
 .sidebar{width:300px;min-width:260px;background:white;border-right:1px solid #e2e8f0;overflow-y:auto;flex-shrink:0}
 .sidebar-header{padding:16px 20px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:white;z-index:10}
 .sidebar-header h2{font-size:13px;font-weight:700;color:#1a1a2e;text-transform:uppercase;letter-spacing:0.5px}
@@ -29,29 +27,20 @@ header p{font-size:12px;color:#90a4ae;margin-top:3px}
 .slider-row{display:flex;align-items:center;gap:8px}
 input[type=range]{flex:1;height:4px;accent-color:#0d1b3e;cursor:pointer}
 .weight-val{font-size:12px;font-weight:700;color:#0d1b3e;min-width:36px;text-align:right}
-.eff-weight{font-size:10px;color:#a0aec0;min-width:48px;text-align:right}
-
-/* MAIN */
 .main{flex:1;overflow-y:auto;padding:20px 24px}
 .tabs{display:flex;gap:4px;margin-bottom:16px}
 .tab{padding:8px 18px;border-radius:8px;border:none;background:white;font-size:13px;font-weight:500;cursor:pointer;color:#718096;border:1.5px solid #e2e8f0;transition:all 0.2s}
 .tab.active{background:#0d1b3e;color:white;border-color:#0d1b3e}
 .panel{display:none}
 .panel.active{display:block}
-
 .chart-card{background:white;border-radius:12px;padding:20px 24px;box-shadow:0 1px 6px rgba(0,0,0,0.07)}
-.chart-card h3{font-size:13px;font-weight:600;color:#718096;margin-bottom:4px}
 .filter-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
 .filter-btn{padding:6px 14px;border-radius:16px;border:1.5px solid #e2e8f0;background:white;font-size:12px;cursor:pointer;transition:all 0.2s;color:#4a5568;font-weight:500}
 .filter-btn.active{background:#0d1b3e;color:white;border-color:#0d1b3e}
 .chart-wrap{position:relative;height:460px}
-.axis-y{position:absolute;left:-22px;top:50%;transform:translateY(-50%) rotate(-90deg);font-size:11px;color:#a0aec0;white-space:nowrap}
-.axis-x{text-align:center;font-size:11px;color:#a0aec0;margin-top:6px}
 .legend{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap}
 .legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#718096}
 .legend-dot{width:10px;height:10px;border-radius:50%}
-
-/* TABLE */
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{text-align:left;padding:8px 12px;border-bottom:2px solid #e2e8f0;color:#718096;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap}
 td{padding:9px 12px;border-bottom:1px solid #f0f4f8;transition:background 0.1s}
@@ -69,8 +58,6 @@ tr:hover td{background:#f7fafc}
 .delta.down{color:#e53e3e}
 .delta.same{color:#a0aec0}
 .note-text{font-size:11px;color:#a0aec0;margin-top:12px;padding:12px;background:#f7fafc;border-radius:8px}
-
-/* TOOLTIP */
 #tooltip{position:fixed;background:#0d1b3e;color:white;padding:12px 16px;border-radius:8px;font-size:12px;pointer-events:none;display:none;z-index:999;min-width:190px;box-shadow:0 4px 20px rgba(0,0,0,0.25)}
 #tooltip .t-name{font-size:14px;font-weight:700;color:#4fc3f7;margin-bottom:8px}
 #tooltip .t-row{display:flex;justify-content:space-between;gap:16px;margin-bottom:3px}
@@ -86,9 +73,7 @@ tr:hover td{background:#f7fafc}
   </div>
   <div class="logo">PXV</div>
 </header>
-
 <div class="body">
-  <!-- SIDEBAR: SLIDERS -->
   <div class="sidebar">
     <div class="sidebar-header">
       <h2>Indicator Weights</h2>
@@ -97,15 +82,11 @@ tr:hover td{background:#f7fafc}
     <div id="sliderContainer"></div>
     <button class="reset-btn" onclick="resetWeights()">↺ Reset to Original</button>
   </div>
-
-  <!-- MAIN -->
   <div class="main">
     <div class="tabs">
       <button class="tab active" onclick="showTab('chart')">Market Map</button>
       <button class="tab" onclick="showTab('table')">Rankings</button>
     </div>
-
-    <!-- CHART PANEL -->
     <div class="panel active" id="panel-chart">
       <div class="chart-card">
         <div class="filter-row">
@@ -115,11 +96,7 @@ tr:hover td{background:#f7fafc}
           <button class="filter-btn" onclick="setFilter('tier2',this)">Tier 2</button>
           <button class="filter-btn" onclick="setFilter('tier3',this)">Tier 3</button>
         </div>
-        <div style="position:relative;padding-left:28px">
-          <span class="axis-y">Supply Distress Score →</span>
-          <div class="chart-wrap"><canvas id="chart"></canvas></div>
-        </div>
-        <div class="axis-x">Market Attractiveness Score →</div>
+        <div class="chart-wrap"><canvas id="chart"></canvas></div>
         <div class="legend">
           <div class="legend-item"><div class="legend-dot" style="background:#0d1b3e"></div>Top 5</div>
           <div class="legend-item"><div class="legend-dot" style="background:#4fc3f7"></div>Tier 2 — Watch</div>
@@ -127,8 +104,6 @@ tr:hover td{background:#f7fafc}
         </div>
       </div>
     </div>
-
-    <!-- TABLE PANEL -->
     <div class="panel" id="panel-table">
       <div class="chart-card">
         <table>
@@ -138,117 +113,93 @@ tr:hover td{background:#f7fafc}
           </tr></thead>
           <tbody id="tableBody"></tbody>
         </table>
-        <div class="note-text">Final Score = weighted sum of all indicator scores ÷ 100. Adjust sliders to see how weights affect rankings. Δ Rank = change from original weights.</div>
+        <div class="note-text">Final Score = weighted sum of all indicator scores ÷ 100. Adjust sliders to see how rankings change. Δ Rank = change from original weights.</div>
       </div>
     </div>
   </div>
 </div>
-
 <div id="tooltip"></div>
-
 <script>
-// ─── RAW DATA ───────────────────────────────────────────────────────────────
 const MSAS = ["Southeast Florida","Orlando","Tampa","Jacksonville","Atlanta","Nashville","Charlotte","Raleigh","Northern Virginia","Suburban Maryland","Boston","Houston","Austin","Dallas","San Antonio","Phoenix","Las Vegas","Denver","Chicago","Indianapolis","Columbus","Kansas City","Charleston","Stamford"];
-
 const INVENTORY = [230400,262264,267188,137567,593912,206998,285586,151368,313192,313192,327259,782026,373109,1001420,252153,469639,204429,348413,592954,188571,255968,195269,82379,49597];
-
 const CATEGORIES = {
   "Demand Fundamentals": [0,1,2,3,4],
   "Market Performance":  [5,6,7],
   "Supply Risk":         [8,9,10],
   "Balance & Affordability": [11,12,13]
 };
-
 const INDICATORS = [
-  {name:"5-Year Population Growth",     weight:0.05, scores:[15.83,75.78,49.93,65.57,55.38,59.55,73.14,76.49,40.07,40.07,31.11,74.32,100.0,76.20,69.54,70.07,64.45,52.63,0.0,41.10,56.75,34.94,63.61,12.33]},
-  {name:"In-Migration as % of Pop",     weight:0.07, scores:[13.46,67.31,53.85,61.54,65.38,69.23,48.08,48.08,63.46,63.46,38.46,25.0,94.23,48.08,42.31,15.38,13.46,100.0,0.0,38.46,36.54,42.31,80.77,21.15]},
-  {name:"Job Growth Rate",              weight:0.10, scores:[55.08,57.32,69.66,71.48,53.34,76.71,100.0,73.15,0.0,0.0,41.49,58.85,62.26,55.46,67.34,61.71,41.90,48.40,55.92,55.08,67.77,47.30,47.13,47.13]},
-  {name:"Annual Demand (Absorption)",   weight:0.10, scores:[20.96,31.05,14.66,18.17,78.09,32.33,54.91,26.47,21.86,21.86,19.78,29.02,79.15,100.0,14.61,63.81,3.17,30.63,22.09,4.68,18.74,7.28,13.84,0.0]},
-  {name:"Ages 21-34 as % of Pop",       weight:0.03, scores:[0.0,51.50,6.02,21.43,40.41,64.66,35.15,34.96,33.27,33.27,59.96,45.49,100.0,55.83,57.14,48.50,37.97,82.52,37.59,38.16,57.71,26.50,45.49,0.0]},
-  {name:"Occupancy/Vacancy Rate",       weight:0.10, scores:[74.12,43.07,43.74,32.39,35.15,38.74,31.75,42.90,64.41,64.41,83.16,28.34,10.89,31.31,0.0,25.69,44.06,30.22,100.0,39.02,48.91,61.09,51.31,66.96]},
-  {name:"Market Rent Changes",          weight:0.10, scores:[56.29,38.65,19.38,48.33,51.53,38.61,37.13,28.21,42.03,42.03,58.35,45.30,0.0,35.56,18.64,13.39,23.31,6.34,100.0,57.36,55.29,75.53,57.41,60.0]},
-  {name:"Rent-Growth Forecast",         weight:0.05, scores:[66.36,46.25,24.10,45.10,55.47,38.84,37.26,37.65,41.40,41.40,56.38,49.46,0.0,34.86,21.62,23.43,32.69,14.14,100.0,67.50,67.23,76.62,67.88,74.12]},
-  {name:"Pipeline as % of Inventory",   weight:0.05, scores:[4.16,49.48,59.49,78.55,78.48,42.15,0.0,62.32,93.93,93.93,55.69,94.36,53.97,73.48,87.81,55.49,82.17,72.88,100.0,85.77,55.41,82.25,66.80,30.85]},
-  {name:"Recent Annual Deliveries",     weight:0.03, scores:[34.19,42.75,53.08,100.0,50.15,66.00,29.20,35.98,66.94,66.94,24.08,93.95,60.60,41.98,59.75,25.85,47.25,43.48,92.27,30.24,0.0,50.11,69.03,25.86]},
-  {name:"Next 12M Supply vs 5Y Avg",    weight:0.09, scores:[0.0,71.65,62.95,100.0,80.75,73.73,38.26,84.20,88.71,88.71,33.94,95.32,88.45,78.16,94.15,72.88,58.64,83.25,73.58,76.33,47.66,69.16,91.35,41.07]},
-  {name:"Affordability (Rent/Income)",  weight:0.10, scores:[0.0,60.97,54.01,81.43,84.33,76.42,78.50,100.0,84.29,84.29,44.56,89.49,98.10,90.62,95.10,85.85,81.10,91.64,66.15,91.46,92.40,91.97,71.04,46.79]},
-  {name:"Forecasted Demand/Supply",     weight:0.10, scores:[93.24,70.36,56.69,82.09,69.64,81.37,76.57,73.96,43.09,43.09,71.14,24.64,100.0,60.32,58.49,67.66,45.02,67.17,48.87,0.0,58.47,55.43,48.36,51.16]},
-  {name:"Rent Control Exposure",        weight:0.03, scores:[50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0]},
+  {name:"5-Year Population Growth",    weight:0.05, scores:[15.83,75.78,49.93,65.57,55.38,59.55,73.14,76.49,40.07,40.07,31.11,74.32,100.0,76.20,69.54,70.07,64.45,52.63,0.0,41.10,56.75,34.94,63.61,12.33]},
+  {name:"In-Migration as % of Pop",    weight:0.07, scores:[13.46,67.31,53.85,61.54,65.38,69.23,48.08,48.08,63.46,63.46,38.46,25.0,94.23,48.08,42.31,15.38,13.46,100.0,0.0,38.46,36.54,42.31,80.77,21.15]},
+  {name:"Job Growth Rate",             weight:0.10, scores:[55.08,57.32,69.66,71.48,53.34,76.71,100.0,73.15,0.0,0.0,41.49,58.85,62.26,55.46,67.34,61.71,41.90,48.40,55.92,55.08,67.77,47.30,47.13,47.13]},
+  {name:"Annual Demand (Absorption)",  weight:0.10, scores:[20.96,31.05,14.66,18.17,78.09,32.33,54.91,26.47,21.86,21.86,19.78,29.02,79.15,100.0,14.61,63.81,3.17,30.63,22.09,4.68,18.74,7.28,13.84,0.0]},
+  {name:"Ages 21-34 as % of Pop",      weight:0.03, scores:[0.0,51.50,6.02,21.43,40.41,64.66,35.15,34.96,33.27,33.27,59.96,45.49,100.0,55.83,57.14,48.50,37.97,82.52,37.59,38.16,57.71,26.50,45.49,0.0]},
+  {name:"Occupancy/Vacancy Rate",      weight:0.10, scores:[74.12,43.07,43.74,32.39,35.15,38.74,31.75,42.90,64.41,64.41,83.16,28.34,10.89,31.31,0.0,25.69,44.06,30.22,100.0,39.02,48.91,61.09,51.31,66.96]},
+  {name:"Market Rent Changes",         weight:0.10, scores:[56.29,38.65,19.38,48.33,51.53,38.61,37.13,28.21,42.03,42.03,58.35,45.30,0.0,35.56,18.64,13.39,23.31,6.34,100.0,57.36,55.29,75.53,57.41,60.0]},
+  {name:"Rent-Growth Forecast",        weight:0.05, scores:[66.36,46.25,24.10,45.10,55.47,38.84,37.26,37.65,41.40,41.40,56.38,49.46,0.0,34.86,21.62,23.43,32.69,14.14,100.0,67.50,67.23,76.62,67.88,74.12]},
+  {name:"Pipeline as % of Inventory",  weight:0.05, scores:[4.16,49.48,59.49,78.55,78.48,42.15,0.0,62.32,93.93,93.93,55.69,94.36,53.97,73.48,87.81,55.49,82.17,72.88,100.0,85.77,55.41,82.25,66.80,30.85]},
+  {name:"Recent Annual Deliveries",    weight:0.03, scores:[34.19,42.75,53.08,100.0,50.15,66.00,29.20,35.98,66.94,66.94,24.08,93.95,60.60,41.98,59.75,25.85,47.25,43.48,92.27,30.24,0.0,50.11,69.03,25.86]},
+  {name:"Next 12M Supply vs 5Y Avg",   weight:0.09, scores:[0.0,71.65,62.95,100.0,80.75,73.73,38.26,84.20,88.71,88.71,33.94,95.32,88.45,78.16,94.15,72.88,58.64,83.25,73.58,76.33,47.66,69.16,91.35,41.07]},
+  {name:"Affordability (Rent/Income)", weight:0.10, scores:[0.0,60.97,54.01,81.43,84.33,76.42,78.50,100.0,84.29,84.29,44.56,89.49,98.10,90.62,95.10,85.85,81.10,91.64,66.15,91.46,92.40,91.97,71.04,46.79]},
+  {name:"Forecasted Demand/Supply",    weight:0.10, scores:[93.24,70.36,56.69,82.09,69.64,81.37,76.57,73.96,43.09,43.09,71.14,24.64,100.0,60.32,58.49,67.66,45.02,67.17,48.87,0.0,58.47,55.43,48.36,51.16]},
+  {name:"Rent Control Exposure",       weight:0.03, scores:[50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0]},
 ];
-
-// Original weights for reset & delta tracking
 const ORIG_WEIGHTS = INDICATORS.map(d => d.weight);
 const ORIG_RANKS = computeOrigRanks();
-
 let currentFilter = 'all';
 let chart;
 
 function computeOrigRanks() {
-  const scores = MSAS.map((_,i) => {
-    return INDICATORS.reduce((sum, ind) => sum + ind.weight * ind.scores[i], 0) / 100;
-  });
+  const scores = MSAS.map((_,i) => INDICATORS.reduce((sum,ind) => sum + ind.weight * ind.scores[i], 0) / 100);
   return rankFrom(scores);
 }
-
 function rankFrom(scores) {
-  const indexed = scores.map((s,i) => ({i, s})).sort((a,b) => b.s - a.s);
-  const ranks = new Array(scores.length);
-  indexed.forEach((item, pos) => ranks[item.i] = pos + 1);
-  return ranks;
+  const idx = scores.map((s,i) => ({i,s})).sort((a,b) => b.s - a.s);
+  const r = new Array(scores.length);
+  idx.forEach((item,pos) => r[item.i] = pos + 1);
+  return r;
 }
-
-// ─── COMPUTE SCORES ──────────────────────────────────────────────────────────
 function computeScores() {
   const total = INDICATORS.reduce((s,d) => s + d.weight, 0);
-  return MSAS.map((_,i) => {
-    const raw = INDICATORS.reduce((sum, ind) => sum + ind.weight * ind.scores[i], 0);
-    return raw / (total * 100);  // normalize by actual total weight
-  });
+  return MSAS.map((_,i) => INDICATORS.reduce((sum,ind) => sum + ind.weight * ind.scores[i], 0) / (total * 100));
 }
-
 function computeAttractiveness() {
-  const attrIdx = [0,1,2,3,4,5,6,7]; // demand + market performance
-  const total = attrIdx.reduce((s,i) => s + INDICATORS[i].weight, 0) || 1;
-  return MSAS.map((_,mi) => {
-    const raw = attrIdx.reduce((sum, i) => sum + INDICATORS[i].weight * INDICATORS[i].scores[mi], 0);
-    return raw / total;
-  });
+  const idx = [0,1,2,3,4,5,6,7];
+  const total = idx.reduce((s,i) => s + INDICATORS[i].weight, 0) || 1;
+  return MSAS.map((_,mi) => idx.reduce((sum,i) => sum + INDICATORS[i].weight * INDICATORS[i].scores[mi], 0) / total);
 }
-
 function computeDistress() {
-  const distIdx = [8,9,10,11,12,13]; // supply risk + balance
-  const total = distIdx.reduce((s,i) => s + INDICATORS[i].weight, 0) || 1;
-  return MSAS.map((_,mi) => {
-    const raw = distIdx.reduce((sum, i) => sum + INDICATORS[i].weight * INDICATORS[i].scores[mi], 0);
-    return raw / total;
-  });
+  const idx = [8,9,10,11,12,13];
+  const total = idx.reduce((s,i) => s + INDICATORS[i].weight, 0) || 1;
+  return MSAS.map((_,mi) => idx.reduce((sum,i) => sum + INDICATORS[i].weight * INDICATORS[i].scores[mi], 0) / total);
 }
-
 function getTier(rank) {
-  if (rank <= 5) return 'Tier 1';
-  if (rank <= 18) return 'Tier 2';
-  return 'Tier 3';
+  return rank <= 5 ? 'Tier 1' : rank <= 18 ? 'Tier 2' : 'Tier 3';
 }
-
-// ─── BUILD SLIDERS ───────────────────────────────────────────────────────────
+function getColor(rank, filter) {
+  const tier = getTier(rank), top5 = rank <= 5;
+  if (filter !== 'all') {
+    const show = (filter==='top5'&&top5)||(filter==='tier2'&&tier==='Tier 2')||(filter==='tier3'&&tier==='Tier 3');
+    if (!show) return 'rgba(176,190,197,0.2)';
+  }
+  if (top5) return 'rgba(13,27,62,0.85)';
+  if (tier === 'Tier 2') return 'rgba(79,195,247,0.75)';
+  return 'rgba(176,190,197,0.55)';
+}
 function buildSliders() {
   const container = document.getElementById('sliderContainer');
   container.innerHTML = '';
   Object.entries(CATEGORIES).forEach(([cat, idxs]) => {
     const group = document.createElement('div');
     group.className = 'category-group';
-    const label = document.createElement('div');
-    label.className = 'category-label';
-    label.textContent = cat;
-    group.appendChild(label);
+    group.innerHTML = `<div class="category-label">${cat}</div>`;
     idxs.forEach(i => {
+      const pct = Math.round(INDICATORS[i].weight * 100);
       const row = document.createElement('div');
       row.className = 'indicator-row';
-      const pct = Math.round(INDICATORS[i].weight * 100);
-      row.innerHTML = `
-        <div class="indicator-name">${INDICATORS[i].name}</div>
+      row.innerHTML = `<div class="indicator-name">${INDICATORS[i].name}</div>
         <div class="slider-row">
-          <input type="range" min="0" max="30" step="1" value="${pct}" id="slider_${i}" oninput="onSlider(${i}, this.value)">
+          <input type="range" min="0" max="30" step="1" value="${pct}" id="slider_${i}" oninput="onSlider(${i},this.value)">
           <span class="weight-val" id="wval_${i}">${pct}%</span>
         </div>`;
       group.appendChild(row);
@@ -257,63 +208,43 @@ function buildSliders() {
   });
   updateTotalDisplay();
 }
-
 function onSlider(idx, val) {
   INDICATORS[idx].weight = parseInt(val) / 100;
   document.getElementById('wval_' + idx).textContent = val + '%';
   updateTotalDisplay();
   refresh();
 }
-
 function updateTotalDisplay() {
   const total = Math.round(INDICATORS.reduce((s,d) => s + d.weight * 100, 0));
   const el = document.getElementById('totalDisplay');
   el.textContent = total + '%';
   el.className = 'total-weight' + (total !== 100 ? ' over' : '');
 }
-
 function resetWeights() {
-  ORIG_WEIGHTS.forEach((w, i) => {
+  ORIG_WEIGHTS.forEach((w,i) => {
     INDICATORS[i].weight = w;
-    const s = document.getElementById('slider_' + i);
-    const v = document.getElementById('wval_' + i);
-    if (s) { s.value = Math.round(w * 100); v.textContent = Math.round(w * 100) + '%'; }
+    const s = document.getElementById('slider_'+i), v = document.getElementById('wval_'+i);
+    if (s) { s.value = Math.round(w*100); v.textContent = Math.round(w*100)+'%'; }
   });
   updateTotalDisplay();
   refresh();
 }
-
-// ─── CHART ───────────────────────────────────────────────────────────────────
-function getColor(rank, filter) {
-  const tier = getTier(rank);
-  const top5 = rank <= 5;
-  if (filter !== 'all') {
-    const show = (filter === 'top5' && top5) || (filter === 'tier2' && tier === 'Tier 2') || (filter === 'tier3' && tier === 'Tier 3');
-    if (!show) return 'rgba(176,190,197,0.2)';
-  }
-  if (top5) return 'rgba(13,27,62,0.85)';
-  if (tier === 'Tier 2') return 'rgba(79,195,247,0.75)';
-  return 'rgba(176,190,197,0.55)';
-}
-
 function buildChart() {
-  const scores = computeScores();
-  const attrs = computeAttractiveness();
-  const dists = computeDistress();
-  const ranks = rankFrom(scores);
-
+  const scores = computeScores(), attrs = computeAttractiveness(), dists = computeDistress(), ranks = rankFrom(scores);
   const ctx = document.getElementById('chart').getContext('2d');
   if (chart) chart.destroy();
-
-  const pts = MSAS.map((msa, i) => ({
-    x: attrs[i], y: dists[i],
-    r: Math.sqrt(INVENTORY[i] / 1000) * 1.5,
+  const pad = 8;
+  const xMin = Math.max(0,   Math.floor(Math.min(...attrs)) - pad);
+  const xMax = Math.min(105, Math.ceil(Math.max(...attrs))  + pad);
+  const yMin = Math.max(0,   Math.floor(Math.min(...dists)) - pad);
+  const yMax = Math.min(105, Math.ceil(Math.max(...dists))  + pad);
+  const pts = MSAS.map((msa,i) => ({
+    x: attrs[i], y: dists[i], r: Math.sqrt(INVENTORY[i]/1000)*1.5,
     label: msa, score: scores[i], rank: ranks[i], idx: i,
     backgroundColor: getColor(ranks[i], currentFilter),
     borderColor: ranks[i] <= 5 ? '#4fc3f7' : 'transparent',
     borderWidth: ranks[i] <= 5 ? 2 : 0,
   }));
-
   chart = new Chart(ctx, {
     type: 'bubble',
     data: { datasets: [{ data: pts, parsing: false }] },
@@ -321,8 +252,10 @@ function buildChart() {
       responsive: true, maintainAspectRatio: false, animation: { duration: 300 },
       plugins: { legend: { display: false }, tooltip: { enabled: false } },
       scales: {
-        x: { min: 10, max: 95, grid: { color: '#f0f4f8' }, ticks: { font: { size: 10 }, color: '#a0aec0' } },
-        y: { min: 5, max: 75, grid: { color: '#f0f4f8' }, ticks: { font: { size: 10 }, color: '#a0aec0' } }
+        x: { min: xMin, max: xMax, grid: { color: '#f0f4f8' }, ticks: { font: { size: 10 }, color: '#a0aec0' },
+             title: { display: true, text: 'Market Attractiveness Score', color: '#a0aec0', font: { size: 11 } } },
+        y: { min: yMin, max: yMax, grid: { color: '#f0f4f8' }, ticks: { font: { size: 10 }, color: '#a0aec0' },
+             title: { display: true, text: 'Supply Distress Score', color: '#a0aec0', font: { size: 11 } } }
       },
       onHover: (event, elements) => {
         const tt = document.getElementById('tooltip');
@@ -334,7 +267,7 @@ function buildChart() {
             <div class="t-row"><span class="t-lbl">Distress</span><span class="t-val">${d.y.toFixed(1)}</span></div>
             <div class="t-row"><span class="t-lbl">Inventory</span><span class="t-val">${INVENTORY[d.idx].toLocaleString()} units</span></div>`;
           tt.style.left = (event.native.clientX + 16) + 'px';
-          tt.style.top = (event.native.clientY - 80) + 'px';
+          tt.style.top  = (event.native.clientY - 80) + 'px';
           tt.style.display = 'block';
           event.native.target.style.cursor = 'pointer';
         } else {
@@ -348,16 +281,13 @@ function buildChart() {
       afterDraw(chart) {
         const ctx = chart.ctx;
         pts.forEach((pt, i) => {
-          const meta = chart.getDatasetMeta(0);
-          const el = meta.data[i];
+          const el = chart.getDatasetMeta(0).data[i];
           const isTop5 = pt.rank <= 5;
           const show = currentFilter === 'all' ? isTop5 :
-            (currentFilter === 'top5' && isTop5) ||
-            (currentFilter === 'tier2' && getTier(pt.rank) === 'Tier 2') ||
-            (currentFilter === 'tier3' && getTier(pt.rank) === 'Tier 3');
+            (currentFilter==='top5'&&isTop5)||(currentFilter==='tier2'&&getTier(pt.rank)==='Tier 2')||(currentFilter==='tier3'&&getTier(pt.rank)==='Tier 3');
           if (!show) return;
           ctx.save();
-          ctx.font = `${isTop5 ? '700' : '500'} 10.5px Segoe UI, Arial`;
+          ctx.font = `${isTop5?'700':'500'} 10.5px Segoe UI, Arial`;
           ctx.fillStyle = isTop5 ? '#0d1b3e' : '#4a5568';
           ctx.textAlign = 'center';
           ctx.fillText(pt.label, el.x, el.y - el.options.radius - 5);
@@ -367,46 +297,31 @@ function buildChart() {
     }]
   });
 }
-
-// ─── TABLE ───────────────────────────────────────────────────────────────────
 function buildTable() {
-  const scores = computeScores();
-  const attrs = computeAttractiveness();
-  const dists = computeDistress();
-  const ranks = rankFrom(scores);
-
-  const sorted = MSAS.map((msa, i) => ({ msa, score: scores[i], attr: attrs[i], dist: dists[i], rank: ranks[i], origRank: ORIG_RANKS[i] }))
-    .sort((a, b) => a.rank - b.rank);
-
-  const tbody = document.getElementById('tableBody');
-  tbody.innerHTML = sorted.map(d => {
-    const tier = getTier(d.rank);
-    const tierCls = tier === 'Tier 1' ? 't1' : tier === 'Tier 2' ? 't2' : 't3';
+  const scores = computeScores(), attrs = computeAttractiveness(), dists = computeDistress(), ranks = rankFrom(scores);
+  const sorted = MSAS.map((msa,i) => ({msa, score:scores[i], attr:attrs[i], dist:dists[i], rank:ranks[i], origRank:ORIG_RANKS[i]})).sort((a,b) => a.rank - b.rank);
+  document.getElementById('tableBody').innerHTML = sorted.map(d => {
+    const tier = getTier(d.rank), tierCls = tier==='Tier 1'?'t1':tier==='Tier 2'?'t2':'t3';
     const barW = Math.round(d.score * 80);
     const delta = d.origRank - d.rank;
     const deltaStr = delta > 0 ? `↑${delta}` : delta < 0 ? `↓${Math.abs(delta)}` : '—';
     const deltaCls = delta > 0 ? 'up' : delta < 0 ? 'down' : 'same';
-    const rowCls = d.rank <= 5 ? 'top5' : '';
-    return `<tr class="${rowCls}">
+    return `<tr class="${d.rank<=5?'top5':''}">
       <td class="rank-num">${d.rank}</td>
-      <td>${d.rank <= 5 ? '<strong>' + d.msa + '</strong>' : d.msa}</td>
+      <td>${d.rank<=5?'<strong>'+d.msa+'</strong>':d.msa}</td>
       <td><div class="score-bar-wrap"><div class="score-bar" style="width:${barW}px"></div><span>${(d.score*100).toFixed(1)}</span></div></td>
-      <td>${d.attr.toFixed(1)}</td>
-      <td>${d.dist.toFixed(1)}</td>
+      <td>${d.attr.toFixed(1)}</td><td>${d.dist.toFixed(1)}</td>
       <td><span class="tier-badge ${tierCls}">${tier}</span></td>
       <td><span class="delta ${deltaCls}">${deltaStr}</span></td>
     </tr>`;
   }).join('');
 }
-
-// ─── CONTROLS ────────────────────────────────────────────────────────────────
 function setFilter(f, btn) {
   currentFilter = f;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   buildChart();
 }
-
 function showTab(tab) {
   document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -414,16 +329,8 @@ function showTab(tab) {
   document.getElementById('panel-' + tab).classList.add('active');
   if (tab === 'chart') buildChart();
 }
-
-function refresh() {
-  buildChart();
-  buildTable();
-}
-
-// ─── INIT ────────────────────────────────────────────────────────────────────
-buildSliders();
-buildChart();
-buildTable();
+function refresh() { buildChart(); buildTable(); }
+buildSliders(); buildChart(); buildTable();
 </script>
 </body>
 </html>
