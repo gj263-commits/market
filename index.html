@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -67,7 +68,6 @@ tr:hover td{background:#f7fafc}
 </head>
 <body>
 
-<!-- PASSWORD GATE -->
 <div id="gate" style="position:fixed;inset:0;background:#0d1b3e;display:flex;align-items:center;justify-content:center;z-index:9999">
   <div style="background:white;border-radius:16px;padding:40px 48px;text-align:center;width:340px;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
     <div style="font-size:24px;font-weight:700;color:#4fc3f7;letter-spacing:1px;margin-bottom:8px">TEST</div>
@@ -77,17 +77,12 @@ tr:hover td{background:#f7fafc}
       style="width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;outline:none;margin-bottom:10px"
       onkeydown="if(event.key==='Enter') checkPw()">
     <div id="pwError" style="font-size:12px;color:#e53e3e;height:16px;margin-bottom:8px"></div>
-    <button onclick="checkPw()"
-      style="width:100%;padding:11px;background:#0d1b3e;color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">
-      Enter
-    </button>
+    <button onclick="checkPw()" style="width:100%;padding:11px;background:#0d1b3e;color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">Enter</button>
   </div>
 </div>
-
 <script>
 function checkPw() {
-  const pw = document.getElementById('pwInput').value;
-  if (pw === 'georgetown') {
+  if (document.getElementById('pwInput').value === 'georgetown') {
     document.getElementById('gate').style.display = 'none';
   } else {
     document.getElementById('pwError').textContent = 'Incorrect password. Try again.';
@@ -95,6 +90,7 @@ function checkPw() {
   }
 }
 </script>
+
 <header>
   <div>
     <h1>Multifamily Market Scoring — 24 MSA Analysis</h1>
@@ -102,6 +98,7 @@ function checkPw() {
   </div>
   <div class="logo">TEST</div>
 </header>
+
 <div class="body">
   <div class="sidebar">
     <div class="sidebar-header">
@@ -142,24 +139,27 @@ function checkPw() {
           </tr></thead>
           <tbody id="tableBody"></tbody>
         </table>
-        <div class="note-text">Final Score = weighted sum of all indicator scores ÷ 100. Adjust sliders to see how rankings change. Δ Rank = change from original weights.</div>
+        <div class="note-text">Final Score = SUMPRODUCT(weights, scores) / 100. Attractiveness = rows 5,6,7,8,9,10,12,17. Distress = inverted rows 11,13,14,15,16,18. Both divided by 0.5 to normalize to 0-100.</div>
       </div>
     </div>
   </div>
 </div>
 <div id="tooltip"></div>
+
 <script>
 const MSAS = ["Southeast Florida","Orlando","Tampa","Jacksonville","Atlanta","Nashville","Charlotte","Raleigh","Northern Virginia","Suburban Maryland","Boston","Houston","Austin","Dallas","San Antonio","Phoenix","Las Vegas","Denver","Chicago","Indianapolis","Columbus","Kansas City","Charleston","Stamford"];
 const INVENTORY = [230400,262264,267188,137567,593912,206998,285586,151368,313192,313192,327259,782026,373109,1001420,252153,469639,204429,348413,592954,188571,255968,195269,82379,49597];
-const CATEGORIES = {
+
 const ATTR_IDX = [0,1,2,3,4,5,7,12];
 const DIST_IDX = [6,8,9,10,11,13];
-  
+
+const CATEGORIES = {
   "Demand Fundamentals": [0,1,2,3,4],
   "Market Performance":  [5,6,7],
   "Supply Risk":         [8,9,10],
   "Balance & Affordability": [11,12,13]
 };
+
 const INDICATORS = [
   {name:"5-Year Population Growth",    weight:0.05, scores:[15.83,75.78,49.93,65.57,55.38,59.55,73.14,76.49,40.07,40.07,31.11,74.32,100.0,76.20,69.54,70.07,64.45,52.63,0.0,41.10,56.75,34.94,63.61,12.33]},
   {name:"In-Migration as % of Pop",    weight:0.07, scores:[13.46,67.31,53.85,61.54,65.38,69.23,48.08,48.08,63.46,63.46,38.46,25.0,94.23,48.08,42.31,15.38,13.46,100.0,0.0,38.46,36.54,42.31,80.77,21.15]},
@@ -176,14 +176,14 @@ const INDICATORS = [
   {name:"Forecasted Demand/Supply",    weight:0.10, scores:[93.24,70.36,56.69,82.09,69.64,81.37,76.57,73.96,43.09,43.09,71.14,24.64,100.0,60.32,58.49,67.66,45.02,67.17,48.87,0.0,58.47,55.43,48.36,51.16]},
   {name:"Rent Control Exposure",       weight:0.03, scores:[50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0]},
 ];
+
 const ORIG_WEIGHTS = INDICATORS.map(d => d.weight);
 const ORIG_RANKS = computeOrigRanks();
 let currentFilter = 'all';
 let chart;
 
 function computeOrigRanks() {
-  const scores = MSAS.map((_,i) => INDICATORS.reduce((sum,ind) => sum + ind.weight * ind.scores[i], 0) / 100);
-  return rankFrom(scores);
+  return rankFrom(MSAS.map((_,i) => INDICATORS.reduce((sum,ind) => sum + ind.weight * ind.scores[i], 0) / 100));
 }
 function rankFrom(scores) {
   const idx = scores.map((s,i) => ({i,s})).sort((a,b) => b.s - a.s);
@@ -192,21 +192,16 @@ function rankFrom(scores) {
   return r;
 }
 function computeScores() {
-  const total = INDICATORS.reduce((s,d) => s + d.weight, 0);
-  return MSAS.map((_,i) => INDICATORS.reduce((sum,ind) => sum + ind.weight * ind.scores[i], 0) / (total * 100));
+  return MSAS.map((_,i) => INDICATORS.reduce((sum,ind) => sum + ind.weight * ind.scores[i], 0) / 100);
 }
 function computeAttractiveness() {
-  const totalW = INDICATORS.reduce((s,d) => s + d.weight, 0) || 1;
-  const denom = totalW / 2;
   return MSAS.map((_,mi) =>
-    ATTR_IDX.reduce((sum,i) => sum + INDICATORS[i].weight * INDICATORS[i].scores[mi], 0) / denom
+    ATTR_IDX.reduce((sum,i) => sum + INDICATORS[i].weight * INDICATORS[i].scores[mi], 0) / 0.5
   );
 }
 function computeDistress() {
-  const totalW = INDICATORS.reduce((s,d) => s + d.weight, 0) || 1;
-  const denom = totalW / 2;
   return MSAS.map((_,mi) =>
-    DIST_IDX.reduce((sum,i) => sum + (100 - INDICATORS[i].scores[mi]) * INDICATORS[i].weight, 0) / denom
+    DIST_IDX.reduce((sum,i) => sum + (100 - INDICATORS[i].scores[mi]) * INDICATORS[i].weight, 0) / 0.5
   );
 }
 function getTier(rank) {
@@ -271,9 +266,9 @@ function buildChart() {
   if (chart) chart.destroy();
   const pad = 8;
   const xMin = Math.max(0,   Math.floor(Math.min(...attrs)) - pad);
-  const xMax = Math.min(105, Math.ceil(Math.max(...attrs))  + pad);
+  const xMax = Math.min(110, Math.ceil(Math.max(...attrs))  + pad);
   const yMin = Math.max(0,   Math.floor(Math.min(...dists)) - pad);
-  const yMax = Math.min(105, Math.ceil(Math.max(...dists))  + pad);
+  const yMax = Math.min(110, Math.ceil(Math.max(...dists))  + pad);
   const pts = MSAS.map((msa,i) => ({
     x: attrs[i], y: dists[i], r: Math.sqrt(INVENTORY[i]/1000)*1.5,
     label: msa, score: scores[i], rank: ranks[i], idx: i,
@@ -316,10 +311,10 @@ function buildChart() {
       id: 'labels',
       afterDraw(chart) {
         const ctx = chart.ctx;
-        pts.forEach((pt, i) => {
+        pts.forEach((pt,i) => {
           const el = chart.getDatasetMeta(0).data[i];
           const isTop5 = pt.rank <= 5;
-          const show = currentFilter === 'all' ? isTop5 :
+          const show = currentFilter==='all' ? isTop5 :
             (currentFilter==='top5'&&isTop5)||(currentFilter==='tier2'&&getTier(pt.rank)==='Tier 2')||(currentFilter==='tier3'&&getTier(pt.rank)==='Tier 3');
           if (!show) return;
           ctx.save();
