@@ -208,7 +208,7 @@ function checkPw(){
 const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSBBfHE787P4JLJVHlhRx21PPhZJJ6YLK0mh6qA4hmeRZALyw6OKzXGqjQznjQTJg/pub?gid=278649265&single=true&output=csv';
 
 const MSAS = ["Southeast Florida","Orlando","Tampa","Jacksonville","Atlanta","Nashville","Charlotte","Raleigh","Northern Virginia","Suburban Maryland","Boston","Houston","Austin","Dallas","San Antonio","Phoenix","Las Vegas","Denver","Chicago","Indianapolis","Columbus","Kansas City","Charleston","Stamford"];
-const INVENTORY = [206884,238983,244738,126961,547172,186971,245561,138528,592057,592057,298251,737113,334625,923653,231768,428912,194102,320794,572359,177749,228347,182517,74646,43160];
+let INVENTORY = [206884,238983,244738,126961,547172,186971,245561,138528,592057,592057,298251,737113,334625,923653,231768,428912,194102,320794,572359,177749,228347,182517,74646,43160];
 
 // Inventory bonus: log-scaled, max +3pts
 const LOG_INV = INVENTORY.map(v => Math.log(v));
@@ -322,9 +322,29 @@ function buildFromCSV(rows) {
     if (!row || row.length < 5) continue;
     if (row[0].trim()) cat = row[0].trim();
     const name = row[1].trim();
+    if (!name) continue;
+
+    // Special case: capture Inventory row (weight=NA)
+    if (name.toLowerCase().includes('inventory units')) {
+      const invRaw = [];
+      for (let c = 4; c < 4 + MSAS.length; c++) {
+        const v = parseFloat(row[c]); invRaw.push(isNaN(v) ? null : v);
+      }
+      if (invRaw.some(v => v !== null)) {
+        // Update INVENTORY array from sheet
+        invRaw.forEach((v, i) => { if (v !== null) INVENTORY[i] = v; });
+        // Recalculate log-based inventory bonus
+        const logInv = INVENTORY.map(v => Math.log(v));
+        const lMin = Math.min(...logInv), lMax = Math.max(...logInv);
+        INV_BONUS = logInv.map(v => parseFloat(((v - lMin) / (lMax - lMin) * INV_BONUS_MAX).toFixed(2)));
+        console.log('Inventory loaded from sheet');
+      }
+      continue;
+    }
+
     let w = parseFloat(row[2]);
-    const inv = row[3].trim().toUpperCase() === 'YES';
-    if (!name || isNaN(w) || w <= 0) continue;
+    const inv = (row[3] || '').trim().toUpperCase() === 'YES';
+    if (isNaN(w) || w <= 0) continue;
     if (w > 1) w = w / 100;
     const raw = [];
     for (let c = 4; c < 4 + MSAS.length; c++) {
