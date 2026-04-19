@@ -28,7 +28,7 @@ header p{font-size:11px;color:#90a4ae;margin-top:2px}
 .total-weight.over{background:#fff5f5;color:#c53030}
 .reset-btn-sm{font-size:10px;color:#718096;background:none;border:none;cursor:pointer;text-decoration:underline}
 .sb-section{border-bottom:1px solid #f0f4f8}
-.sb-sec-title{padding:8px 14px 5px;font-size:10px;font-weight:700;color:#a0aec0;text-transform:uppercase;letter-spacing:0.6px;background:#fafbfc;cursor:pointer;display:flex;justify-content:space-between;user-select:none}
+.sb-sec-title{padding:8px 14px 5px;font-size:10px;font-weight:700;color:#a0aec0;text-transform:uppercase;letter-spacing:0.6px;background:#fafbfc}
 .ind-row{padding:5px 14px 7px}
 .ind-name{font-size:11px;color:#4a5568;margin-bottom:3px;line-height:1.3}
 .sl-row{display:flex;align-items:center;gap:5px}
@@ -79,7 +79,7 @@ tr:hover td{background:#f7fafc}
 .delta.down{color:#e53e3e}
 .delta.same{color:#a0aec0}
 .note-text{font-size:10px;color:#a0aec0;margin-top:8px;padding:8px;background:#f7fafc;border-radius:6px;line-height:1.5}
-#tooltip{position:fixed;background:#0d1b3e;color:white;padding:10px 13px;border-radius:7px;font-size:11px;pointer-events:none;display:none;z-index:999;min-width:175px;box-shadow:0 4px 18px rgba(0,0,0,0.25)}
+#tooltip{position:fixed;background:#0d1b3e;color:white;padding:10px 13px;border-radius:7px;font-size:11px;pointer-events:none;display:none;z-index:999;min-width:180px;box-shadow:0 4px 18px rgba(0,0,0,0.25)}
 #tooltip .tn{font-size:13px;font-weight:700;color:#4fc3f7;margin-bottom:5px}
 #tooltip .tr{display:flex;justify-content:space-between;gap:12px;margin-bottom:2px}
 #tooltip .tl{color:#90a4ae}
@@ -130,9 +130,9 @@ function checkPw(){
     <div class="sb-top">
       <h2>Risk Profile & Weights</h2>
       <div class="profile-btns">
-        <button class="profile-btn core" onclick="setProfile('core',this)">🏛️ Core<br><span style="font-weight:400;font-size:9px">Stability</span></button>
-        <button class="profile-btn coreplus active" onclick="setProfile('coreplus',this)">📈 Core+<br><span style="font-weight:400;font-size:9px">Growth</span></button>
-        <button class="profile-btn valueadd" onclick="setProfile('valueadd',this)">🔄 Value-Add<br><span style="font-weight:400;font-size:9px">Recovery</span></button>
+        <button class="profile-btn core" onclick="setProfile('core',this)">🏛️ Defensive<br><span style="font-weight:400;font-size:9px">Core</span></button>
+        <button class="profile-btn coreplus active" onclick="setProfile('coreplus',this)">📈 Growth<br><span style="font-weight:400;font-size:9px">Core+</span></button>
+        <button class="profile-btn valueadd" onclick="setProfile('valueadd',this)">🔄 Recovery<br><span style="font-weight:400;font-size:9px">Value-Add</span></button>
       </div>
       <div class="total-row">
         <div class="total-weight" id="totalDisplay">100%</div>
@@ -140,7 +140,7 @@ function checkPw(){
       </div>
     </div>
 
-    <div class="sb-section" id="sliderSection">
+    <div class="sb-section">
       <div class="sb-sec-title">Indicator Weights</div>
       <div id="sliderContainer"></div>
     </div>
@@ -175,6 +175,7 @@ function checkPw(){
           <div class="legend-item"><div class="legend-dot" style="background:#0d1b3e"></div>Top 5</div>
           <div class="legend-item"><div class="legend-dot" style="background:#4fc3f7"></div>Tier 2</div>
           <div class="legend-item"><div class="legend-dot" style="background:#b0bec5"></div>Tier 3</div>
+          <div class="legend-item" style="margin-left:8px;font-style:italic">Bubble size = inventory</div>
         </div>
       </div>
     </div>
@@ -189,10 +190,10 @@ function checkPw(){
           <tbody id="tableBody"></tbody>
         </table>
         <div class="note-text">
-          Final Score = Weighted Base Score + Penalty/Incentive adjustments.<br>
-          Attractiveness = Demand + Market Performance indicators.<br>
-          Distress = Supply Risk + Balance & Affordability (inverted).<br>
-          Δ Rank = change from Core+ default weights (no adjustments).
+          Final Score = Capped Z-Score weighted base + Penalty/Incentive + Inventory bonus.<br>
+          Normalization: Z-score capped at ±2σ → rescaled 0–100. Prevents small-range indicators from being over-amplified.<br>
+          Inventory bonus: up to +3pts for larger institutional markets (log scale).<br>
+          Δ Rank = vs. Growth (Core+) default.
         </div>
       </div>
     </div>
@@ -209,8 +210,45 @@ const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSBBfHE787P4J
 const MSAS = ["Southeast Florida","Orlando","Tampa","Jacksonville","Atlanta","Nashville","Charlotte","Raleigh","Northern Virginia","Suburban Maryland","Boston","Houston","Austin","Dallas","San Antonio","Phoenix","Las Vegas","Denver","Chicago","Indianapolis","Columbus","Kansas City","Charleston","Stamford"];
 const INVENTORY = [206884,238983,244738,126961,547172,186971,245561,138528,592057,592057,298251,737113,334625,923653,231768,428912,194102,320794,572359,177749,228347,182517,74646,43160];
 
+// Inventory bonus: log-scaled, max +3pts
+const LOG_INV = INVENTORY.map(v => Math.log(v));
+const LOG_MIN = Math.min(...LOG_INV), LOG_MAX = Math.max(...LOG_INV);
+const INV_BONUS = LOG_INV.map(v => parseFloat(((v - LOG_MIN) / (LOG_MAX - LOG_MIN) * 3).toFixed(2)));
+
 // ═══════════════════════════════════════════════════════
-// PENALTY RAW DATA (hardcoded - from CoStar/GreenStreet processing)
+// FIXED PROFILE WEIGHTS
+// keyword → weight per profile (must sum to 100)
+// ═══════════════════════════════════════════════════════
+const PROFILE_WEIGHTS = {
+  core: {
+    // Defensive: occupancy, supply discipline, affordability, cashflow
+    'Occupancy': 15, 'Rent-to-income': 15, 'Pipeline': 10,
+    'Next 12M': 9, 'Forecasted 1-Year': 10, 'Absorption Pace': 9,
+    'Market Rent Growth': 7, 'Rent-Growth Forecast': 4,
+    'Job Growth': 4, '5-Year Population': 3, 'In-Migration': 3,
+    'Annual Demand': 2, 'Recent Annual Deliveries': 2, 'Rent Control': 3,
+    'Ages': 0
+  },
+  coreplus: {
+    // Growth: job growth momentum + forward rent trajectory
+    'Job Growth': 20, 'Market Rent Growth': 14, 'Rent-Growth Forecast': 13,
+    '5-Year Population': 9, 'In-Migration': 7, 'Ages': 5,
+    'Occupancy': 5, 'Annual Demand': 3, 'Next 12M': 3,
+    'Absorption Pace': 3, 'Rent-to-income': 4, 'Forecasted 1-Year': 4,
+    'Pipeline': 3, 'Recent Annual Deliveries': 2, 'Rent Control': 2
+  },
+  valueadd: {
+    // Recovery: in-migration, demand/supply, liquidity signal
+    'In-Migration': 14, 'Forecasted 1-Year': 12, 'Occupancy': 10,
+    '5-Year Population': 8, 'Annual Demand': 6, 'Absorption Pace': 7,
+    'Market Rent Growth': 7, 'Rent-Growth Forecast': 7, 'Rent-to-income': 6,
+    'Pipeline': 5, 'Job Growth': 5, 'Next 12M': 4,
+    'Recent Annual Deliveries': 2, 'Rent Control': 1, 'Ages': 2
+  }
+};
+
+// ═══════════════════════════════════════════════════════
+// PENALTY DATA
 // ═══════════════════════════════════════════════════════
 const PEN_DATA = {
   jobgap:      { label:'Job Growth Momentum', vals:[-0.005606,0.000192,0.001307,0.000004,0.00238,0.001033,-0.0021,0.002924,0.001131,0.001131,0.000338,-0.01991,-0.003556,-0.003991,-0.004208,0.001398,-0.006053,-0.012505,-0.004685,-0.001826,-0.000598,0.001201,null,null] },
@@ -221,20 +259,10 @@ const PEN_DATA = {
 };
 const RENTGROW25 = [-0.00505,-0.02038,-0.0251,-0.01061,-0.01155,-0.02044,-0.02185,-0.02998,-0.01489,-0.01489,0.00304,-0.00776,-0.0546,-0.0223,-0.02647,-0.02962,-0.01947,-0.03367,0.04086,-0.00397,-0.00507,0.01486,-0.00978,0.00526];
 
-// Profile-specific penalty magnitudes and job gap thresholds
 const PROFILE_PEN = {
   core:     { jobgap:2, recovery:2, prior5y:3, monthsabsorb:5, ages2534:1, jobgapThresh:0.002 },
   coreplus: { jobgap:5, recovery:2, prior5y:4, monthsabsorb:3, ages2534:2, jobgapThresh:0.003 },
   valueadd: { jobgap:2, recovery:10, prior5y:2, monthsabsorb:3, ages2534:2, jobgapThresh:0.002 },
-};
-
-// ═══════════════════════════════════════════════════════
-// RISK PROFILES (weight multipliers on top of sheet weights)
-// ═══════════════════════════════════════════════════════
-const PROFILES = {
-  core:     { focus:['Occupancy','Pipeline','Next 12M','Absorption Pace','Rent-to-Income','Forecasted'], boost:2.0, other:0.5 },
-  coreplus: { focus:['Job Growth','Market Rent','Rent-Growth Forecast','5-Year Population','In-Migration'], boost:2.0, other:0.6 },
-  valueadd: { focus:['In-Migration','Forecasted','Occupancy','5-Year Population','Annual Demand'], boost:2.0, other:0.6 },
 };
 
 // ═══════════════════════════════════════════════════════
@@ -244,11 +272,29 @@ let RAW_INDICATORS = [];
 let INDICATORS = [];
 let CATEGORIES = {};
 let ATTR_INDICES = [], DIST_INDICES = [];
-let penMag = { ...PROFILE_PEN.coreplus };
+let penMag = {...PROFILE_PEN.coreplus};
 let ORIG_RANKS = [];
 let currentProfile = 'coreplus';
 let currentFilter = 'all';
 let chart;
+
+// ═══════════════════════════════════════════════════════
+// NORMALIZATION: Capped Z-score → 0-100
+// Prevents small-range indicators from being over-amplified
+// ═══════════════════════════════════════════════════════
+function cappedZscore(vals, invert) {
+  const clean = vals.filter(v => v !== null && !isNaN(v));
+  if (clean.length < 2) return vals.map(() => 50);
+  const mean = clean.reduce((a, b) => a + b, 0) / clean.length;
+  const std = Math.sqrt(clean.reduce((s, v) => s + Math.pow(v - mean, 2), 0) / clean.length);
+  if (std < 1e-10) return vals.map(() => 50);
+  return vals.map(v => {
+    if (v === null || isNaN(v)) return 50;
+    const z = Math.max(-2, Math.min(2, (v - mean) / std));
+    const s = (z + 2) / 4 * 100;
+    return parseFloat((invert ? 100 - s : s).toFixed(2));
+  });
+}
 
 // ═══════════════════════════════════════════════════════
 // LOAD & PARSE
@@ -274,53 +320,49 @@ function buildFromCSV(rows) {
     const name = row[1].trim();
     let w = parseFloat(row[2]);
     const inv = row[3].trim().toUpperCase() === 'YES';
-    if (!name || !w || w <= 0) continue;
-    if (w > 1) w = w / 100; // handle % format
+    if (!name || isNaN(w) || w <= 0) continue;
+    if (w > 1) w = w / 100;
     const raw = [];
     for (let c = 4; c < 4 + MSAS.length; c++) {
       const v = parseFloat(row[c]); raw.push(isNaN(v) ? null : v);
     }
-    inds.push({ name, cat, weight: w, invert: inv, raw });
+    inds.push({ name, cat, baseWeight: w, invert: inv, raw });
   }
   return inds;
 }
 
-function minmax(vals, invert) {
-  const clean = vals.filter(v => v !== null && !isNaN(v));
-  if (!clean.length) return vals.map(() => 50);
-  const mn = Math.min(...clean), mx = Math.max(...clean);
-  if (mx === mn) return vals.map(() => 50);
-  return vals.map(v => {
-    if (v === null || isNaN(v)) return 50;
-    const s = (v - mn) / (mx - mn) * 100;
-    return parseFloat((invert ? 100 - s : s).toFixed(2));
-  });
+// Match indicator name to profile weight key
+function getProfileWeight(name, profile) {
+  const W = PROFILE_WEIGHTS[profile];
+  for (const [key, w] of Object.entries(W)) {
+    if (name.toLowerCase().includes(key.toLowerCase())) return w;
+  }
+  return 1; // fallback
 }
 
 function applyProfile(profile) {
-  const P = PROFILES[profile];
-  penMag = { ...PROFILE_PEN[profile] };
+  penMag = {...PROFILE_PEN[profile]};
 
-  // Apply multipliers
-  let inds = RAW_INDICATORS.map(ind => {
-    const match = P.focus.some(f => ind.name.toLowerCase().includes(f.toLowerCase()));
-    return { ...ind, weight: ind.weight * (match ? P.boost : P.other) };
+  // Assign fixed weights from profile
+  const inds = RAW_INDICATORS.map(ind => {
+    const pw = getProfileWeight(ind.name, profile);
+    return {
+      ...ind,
+      weight: pw / 100,
+      scores: cappedZscore(ind.raw, ind.invert)
+    };
   });
 
   // Normalize weights to sum = 1
   const total = inds.reduce((s, d) => s + d.weight, 0);
-  inds = inds.map(ind => ({ ...ind, weight: parseFloat((ind.weight / total).toFixed(5)), scores: minmax(ind.raw, ind.invert) }));
+  INDICATORS = inds.map(ind => ({...ind, weight: parseFloat((ind.weight / total).toFixed(5))}));
 
-  INDICATORS = inds;
-
-  // Categories
   CATEGORIES = {};
   INDICATORS.forEach((ind, i) => {
     if (!CATEGORIES[ind.cat]) CATEGORIES[ind.cat] = [];
     CATEGORIES[ind.cat].push(i);
   });
 
-  // Attr / Dist split
   ATTR_INDICES = []; DIST_INDICES = [];
   INDICATORS.forEach((ind, i) => {
     if (['Demand Fundamentals','Market Performance'].some(c => ind.cat.includes(c))) ATTR_INDICES.push(i);
@@ -334,15 +376,14 @@ async function loadData() {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const rows = parseCSV(await res.text());
     RAW_INDICATORS = buildFromCSV(rows);
-    if (RAW_INDICATORS.length < 5) throw new Error('Too few indicators parsed');
+    if (RAW_INDICATORS.length < 5) throw new Error('Too few indicators');
     showBadge(true);
   } catch(e) {
     console.warn('Sheet load failed:', e.message);
     showBadge(false);
-    document.getElementById('lo').innerHTML = '<div style="text-align:center;padding:20px"><div style="font-size:15px;margin-bottom:8px">⚠️ Could not load data</div><div style="font-size:12px;color:#90a4ae">Check Google Sheets is published publicly (File → Share → Publish to web).</div></div>';
+    document.getElementById('lo').innerHTML = '<div style="text-align:center;padding:20px"><div style="font-size:15px;margin-bottom:8px">⚠️ Could not load data</div><div style="font-size:12px;color:#90a4ae">Check Google Sheets is published publicly.</div></div>';
     return;
   }
-
   applyProfile(currentProfile);
   ORIG_RANKS = rankFrom(computeFinalScores().map(s => s.final));
   document.getElementById('lo').style.display = 'none';
@@ -365,7 +406,6 @@ function showBadge(ok) {
 // SCORING
 // ═══════════════════════════════════════════════════════
 function computeBase() {
-  // Returns 0-100 scores
   return MSAS.map((_, mi) => INDICATORS.reduce((sum, ind) => sum + ind.weight * ind.scores[mi], 0));
 }
 
@@ -411,7 +451,8 @@ function computeFinalScores() {
   const base = computeBase();
   return MSAS.map((_, i) => {
     const adj = computePenalty(i);
-    return { base: base[i], adj, final: base[i] + adj };
+    const invBonus = INV_BONUS[i];
+    return { base: base[i], adj, invBonus, final: base[i] + adj + invBonus };
   });
 }
 
@@ -430,7 +471,7 @@ function computeDistress() {
 }
 
 function rankFrom(scores) {
-  const idx = scores.map((s, i) => ({ i, s })).sort((a, b) => b.s - a.s);
+  const idx = scores.map((s, i) => ({i, s})).sort((a, b) => b.s - a.s);
   const r = new Array(scores.length);
   idx.forEach((item, pos) => r[item.i] = pos + 1);
   return r;
@@ -460,7 +501,7 @@ function resetProfile() {
 }
 
 // ═══════════════════════════════════════════════════════
-// UI BUILDERS
+// UI
 // ═══════════════════════════════════════════════════════
 function buildSliders() {
   const container = document.getElementById('sliderContainer');
@@ -525,7 +566,7 @@ function updateTotal() {
 function getColor(rank, filter) {
   const tier = getTier(rank), top5 = rank <= 5;
   if (filter !== 'all') {
-    const show = (filter === 'top5' && top5) || (filter === 'tier2' && tier === 'Tier 2') || (filter === 'tier3' && tier === 'Tier 3');
+    const show = (filter==='top5'&&top5)||(filter==='tier2'&&tier==='Tier 2')||(filter==='tier3'&&tier==='Tier 3');
     if (!show) return 'rgba(176,190,197,0.15)';
   }
   if (top5) return 'rgba(13,27,62,0.85)';
@@ -567,16 +608,16 @@ function buildChart() {
         const tt = document.getElementById('tooltip');
         if (elements.length > 0) {
           const d = pts[elements[0].index];
-          const adj = d.score.adj;
           tt.innerHTML = `<div class="tn">#${d.rank} ${d.label}</div>
             <div class="tr"><span class="tl">Final Score</span><span class="tv">${d.score.final.toFixed(1)}</span></div>
             <div class="tr"><span class="tl">Base Score</span><span class="tv">${d.score.base.toFixed(1)}</span></div>
-            <div class="tr"><span class="tl">Adjustment</span><span class="tv">${adj >= 0 ? '+' : ''}${adj}</span></div>
+            <div class="tr"><span class="tl">Pen/Inc Adj</span><span class="tv">${d.score.adj >= 0 ? '+' : ''}${d.score.adj}</span></div>
+            <div class="tr"><span class="tl">Inv. Bonus</span><span class="tv">+${d.score.invBonus.toFixed(1)}</span></div>
             <div class="tr"><span class="tl">Attractiveness</span><span class="tv">${d.x.toFixed(1)}</span></div>
             <div class="tr"><span class="tl">Distress</span><span class="tv">${d.y.toFixed(1)}</span></div>
             <div class="tr"><span class="tl">Inventory</span><span class="tv">${INVENTORY[d.idx].toLocaleString()}</span></div>`;
           tt.style.left = (event.native.clientX + 16) + 'px';
-          tt.style.top = (event.native.clientY - 90) + 'px';
+          tt.style.top = (event.native.clientY - 100) + 'px';
           tt.style.display = 'block';
           event.native.target.style.cursor = 'pointer';
         } else { tt.style.display = 'none'; event.native.target.style.cursor = 'default'; }
@@ -590,9 +631,7 @@ function buildChart() {
           const el = c.getDatasetMeta(0).data[i];
           const isTop5 = pt.rank <= 5;
           const show = currentFilter === 'all' ? isTop5 :
-            (currentFilter === 'top5' && isTop5) ||
-            (currentFilter === 'tier2' && getTier(pt.rank) === 'Tier 2') ||
-            (currentFilter === 'tier3' && getTier(pt.rank) === 'Tier 3');
+            (currentFilter==='top5'&&isTop5)||(currentFilter==='tier2'&&getTier(pt.rank)==='Tier 2')||(currentFilter==='tier3'&&getTier(pt.rank)==='Tier 3');
           if (!show) return;
           ctx.save();
           ctx.font = `${isTop5 ? '700' : '500'} 10px Segoe UI, Arial`;
@@ -622,14 +661,14 @@ function buildTable() {
   })).sort((a, b) => a.rank - b.rank);
 
   document.getElementById('tableBody').innerHTML = sorted.map(d => {
-    const tier = getTier(d.rank), tierCls = tier === 'Tier 1' ? 't1' : tier === 'Tier 2' ? 't2' : 't3';
+    const tier = getTier(d.rank), tierCls = tier==='Tier 1'?'t1':tier==='Tier 2'?'t2':'t3';
     const barW = Math.max(0, Math.min(80, Math.round(d.score.final * 0.8)));
     const delta = d.origRank - d.rank;
     const deltaStr = delta > 0 ? `↑${delta}` : delta < 0 ? `↓${Math.abs(delta)}` : '—';
     const deltaCls = delta > 0 ? 'up' : delta < 0 ? 'down' : 'same';
-    const adj = d.score.adj;
-    const adjHtml = adj !== 0
-      ? `<span class="adj-chip ${adj > 0 ? 'adj-pos' : 'adj-neg'}">${adj >= 0 ? '+' : ''}${adj}</span>`
+    const totalAdj = d.score.adj + d.score.invBonus;
+    const adjHtml = totalAdj !== 0
+      ? `<span class="adj-chip ${totalAdj > 0 ? 'adj-pos' : 'adj-neg'}">${totalAdj >= 0 ? '+' : ''}${totalAdj.toFixed(1)}</span>`
       : '—';
     return `<tr class="${d.rank <= 5 ? 'top5' : ''}">
       <td class="rank-num">${d.rank}</td>
@@ -661,9 +700,6 @@ function showTab(tab) {
 }
 function refresh() { buildChart(); buildTable(); }
 
-// ═══════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════
 loadData();
 </script>
 </body>
