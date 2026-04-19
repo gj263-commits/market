@@ -653,7 +653,7 @@ function buildChart() {
   const chartData = MSAS.map((_, i) => ({
     x: attrs[i],
     y: dists[i],
-    r: Math.max(5, Math.sqrt(INVENTORY[i] / 1000) * 1.5),
+    r: 6 + (INVENTORY[i] - minInv) / (maxInv - minInv) * 28,
   }));
   const bgColors = MSAS.map((_, i) => getColor(ranks[i], currentFilter));
   const borderColors = MSAS.map((_, i) => ranks[i] <= 5 ? '#4fc3f7' : 'transparent');
