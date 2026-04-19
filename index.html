@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Multifamily Market Map</title>
+<title>PXV — Multifamily Market Map</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -64,13 +63,20 @@ tr:hover td{background:#f7fafc}
 #tooltip .t-row{display:flex;justify-content:space-between;gap:16px;margin-bottom:3px}
 #tooltip .t-lbl{color:#90a4ae}
 #tooltip .t-val{font-weight:600}
+#loading-overlay{position:fixed;inset:0;background:rgba(13,27,62,0.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9998;color:white;gap:16px}
+#loading-overlay .spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,0.2);border-top-color:#4fc3f7;border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loading-overlay p{font-size:14px;color:#90a4ae}
+.data-source{font-size:10px;color:#a0aec0;padding:6px 12px;background:#f7fafc;border-radius:6px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.data-source .dot{width:6px;height:6px;border-radius:50%;background:#38a169;flex-shrink:0}
+.data-source .dot.fallback{background:#e69500}
 </style>
 </head>
 <body>
 
 <div id="gate" style="position:fixed;inset:0;background:#0d1b3e;display:flex;align-items:center;justify-content:center;z-index:9999">
   <div style="background:white;border-radius:16px;padding:40px 48px;text-align:center;width:340px;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
-    <div style="font-size:24px;font-weight:700;color:#4fc3f7;letter-spacing:1px;margin-bottom:8px">TEST</div>
+    <div style="font-size:24px;font-weight:700;color:#4fc3f7;letter-spacing:1px;margin-bottom:8px">PXV</div>
     <div style="font-size:15px;font-weight:600;color:#1a1a2e;margin-bottom:6px">Multifamily Market Map</div>
     <div style="font-size:12px;color:#a0aec0;margin-bottom:28px">Enter password to continue</div>
     <input id="pwInput" type="password" placeholder="Password"
@@ -91,12 +97,17 @@ function checkPw() {
 }
 </script>
 
+<div id="loading-overlay">
+  <div class="spinner"></div>
+  <p>Loading latest data from Google Sheets...</p>
+</div>
+
 <header>
   <div>
     <h1>Multifamily Market Scoring — 24 MSA Analysis</h1>
     <p>Adjust indicator weights in real time · Scores auto-recalculate</p>
   </div>
-  <div class="logo">TEST</div>
+  <div class="logo">PXV</div>
 </header>
 
 <div class="body">
@@ -109,6 +120,10 @@ function checkPw() {
     <button class="reset-btn" onclick="resetWeights()">↺ Reset to Original</button>
   </div>
   <div class="main">
+    <div id="dataSourceBadge" class="data-source" style="display:none">
+      <div class="dot" id="sourceDot"></div>
+      <span id="sourceText"></span>
+    </div>
     <div class="tabs">
       <button class="tab active" onclick="showTab('chart')">Market Map</button>
       <button class="tab" onclick="showTab('table')">Rankings</button>
@@ -139,7 +154,7 @@ function checkPw() {
           </tr></thead>
           <tbody id="tableBody"></tbody>
         </table>
-        <div class="note-text">Final Score = SUMPRODUCT(weights, scores) / 100. Attractiveness = rows 5,6,7,8,9,10,12,17. Distress = inverted rows 11,13,14,15,16,18. Both divided by 0.5 to normalize to 0-100.</div>
+        <div class="note-text">Final Score = weighted sum of normalized indicator scores. Attractiveness = Demand + Market Performance. Distress = Supply Risk + Balance & Affordability (inverted). Δ Rank = change from default weights.</div>
       </div>
     </div>
   </div>
@@ -147,76 +162,129 @@ function checkPw() {
 <div id="tooltip"></div>
 
 <script>
+const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSBBfHE787P4JLJVHlhRx21PPhZJJ6YLK0mh6qA4hmeRZALyw6OKzXGqjQznjQTJg/pub?gid=278649265&single=true&output=csv';
+
 const MSAS = ["Southeast Florida","Orlando","Tampa","Jacksonville","Atlanta","Nashville","Charlotte","Raleigh","Northern Virginia","Suburban Maryland","Boston","Houston","Austin","Dallas","San Antonio","Phoenix","Las Vegas","Denver","Chicago","Indianapolis","Columbus","Kansas City","Charleston","Stamford"];
-const INVENTORY = [230400,262264,267188,137567,593912,206998,285586,151368,313192,313192,327259,782026,373109,1001420,252153,469639,204429,348413,592954,188571,255968,195269,82379,49597];
+const INVENTORY = [206884,238983,244738,126961,547172,186971,245561,138528,592057,592057,298251,737113,334625,923653,231768,428912,194102,320794,572359,177749,228347,182517,74646,43160];
 
-const ATTR_IDX = [0,1,2,3,4,5,7,12];
-const DIST_IDX = [6,8,9,10,11,13];
+let INDICATORS = [], CATEGORIES = {}, ATTR_INDICES = [], DIST_INDICES = [];
+let ORIG_WEIGHTS = [], ORIG_RANKS = [], currentFilter = 'all', chart;
 
-const CATEGORIES = {
-  "Demand Fundamentals": [0,1,2,3,4],
-  "Market Performance":  [5,6,7],
-  "Supply Risk":         [8,9,10],
-  "Balance & Affordability": [11,12,13]
-};
-
-const INDICATORS = [
-  {name:"5-Year Population Growth",    weight:0.05, scores:[15.83,75.78,49.93,65.57,55.38,59.55,73.14,76.49,40.07,40.07,31.11,74.32,100.0,76.20,69.54,70.07,64.45,52.63,0.0,41.10,56.75,34.94,63.61,12.33]},
-  {name:"In-Migration as % of Pop",    weight:0.07, scores:[13.46,67.31,53.85,61.54,65.38,69.23,48.08,48.08,63.46,63.46,38.46,25.0,94.23,48.08,42.31,15.38,13.46,100.0,0.0,38.46,36.54,42.31,80.77,21.15]},
-  {name:"Job Growth Rate",             weight:0.10, scores:[55.08,57.32,69.66,71.48,53.34,76.71,100.0,73.15,0.0,0.0,41.49,58.85,62.26,55.46,67.34,61.71,41.90,48.40,55.92,55.08,67.77,47.30,47.13,47.13]},
-  {name:"Annual Demand (Absorption)",  weight:0.10, scores:[20.96,31.05,14.66,18.17,78.09,32.33,54.91,26.47,21.86,21.86,19.78,29.02,79.15,100.0,14.61,63.81,3.17,30.63,22.09,4.68,18.74,7.28,13.84,0.0]},
-  {name:"Ages 21-34 as % of Pop",      weight:0.03, scores:[0.0,51.50,6.02,21.43,40.41,64.66,35.15,34.96,33.27,33.27,59.96,45.49,100.0,55.83,57.14,48.50,37.97,82.52,37.59,38.16,57.71,26.50,45.49,0.0]},
-  {name:"Occupancy/Vacancy Rate",      weight:0.10, scores:[74.12,43.07,43.74,32.39,35.15,38.74,31.75,42.90,64.41,64.41,83.16,28.34,10.89,31.31,0.0,25.69,44.06,30.22,100.0,39.02,48.91,61.09,51.31,66.96]},
-  {name:"Market Rent Changes",         weight:0.10, scores:[56.29,38.65,19.38,48.33,51.53,38.61,37.13,28.21,42.03,42.03,58.35,45.30,0.0,35.56,18.64,13.39,23.31,6.34,100.0,57.36,55.29,75.53,57.41,60.0]},
-  {name:"Rent-Growth Forecast",        weight:0.05, scores:[66.36,46.25,24.10,45.10,55.47,38.84,37.26,37.65,41.40,41.40,56.38,49.46,0.0,34.86,21.62,23.43,32.69,14.14,100.0,67.50,67.23,76.62,67.88,74.12]},
-  {name:"Pipeline as % of Inventory",  weight:0.05, scores:[4.16,49.48,59.49,78.55,78.48,42.15,0.0,62.32,93.93,93.93,55.69,94.36,53.97,73.48,87.81,55.49,82.17,72.88,100.0,85.77,55.41,82.25,66.80,30.85]},
-  {name:"Recent Annual Deliveries",    weight:0.03, scores:[34.19,42.75,53.08,100.0,50.15,66.00,29.20,35.98,66.94,66.94,24.08,93.95,60.60,41.98,59.75,25.85,47.25,43.48,92.27,30.24,0.0,50.11,69.03,25.86]},
-  {name:"Next 12M Supply vs 5Y Avg",   weight:0.09, scores:[0.0,71.65,62.95,100.0,80.75,73.73,38.26,84.20,88.71,88.71,33.94,95.32,88.45,78.16,94.15,72.88,58.64,83.25,73.58,76.33,47.66,69.16,91.35,41.07]},
-  {name:"Affordability (Rent/Income)", weight:0.10, scores:[0.0,60.97,54.01,81.43,84.33,76.42,78.50,100.0,84.29,84.29,44.56,89.49,98.10,90.62,95.10,85.85,81.10,91.64,66.15,91.46,92.40,91.97,71.04,46.79]},
-  {name:"Forecasted Demand/Supply",    weight:0.10, scores:[93.24,70.36,56.69,82.09,69.64,81.37,76.57,73.96,43.09,43.09,71.14,24.64,100.0,60.32,58.49,67.66,45.02,67.17,48.87,0.0,58.47,55.43,48.36,51.16]},
-  {name:"Rent Control Exposure",       weight:0.03, scores:[50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0,50.0]},
-];
-
-const ORIG_WEIGHTS = INDICATORS.map(d => d.weight);
-const ORIG_RANKS = computeOrigRanks();
-let currentFilter = 'all';
-let chart;
-
-function computeOrigRanks() {
-  return rankFrom(MSAS.map((_,i) => INDICATORS.reduce((sum,ind) => sum + ind.weight * ind.scores[i], 0) / 100));
+function minMaxNormalize(vals, invert) {
+  const clean = vals.filter(v => v !== null && !isNaN(v));
+  if (!clean.length) return vals.map(() => 50);
+  const mn = Math.min(...clean), mx = Math.max(...clean);
+  if (mx === mn) return vals.map(() => 50);
+  return vals.map(v => {
+    if (v === null || isNaN(v)) return 50;
+    const s = (v - mn) / (mx - mn) * 100;
+    return parseFloat((invert ? 100 - s : s).toFixed(2));
+  });
 }
-function rankFrom(scores) {
-  const idx = scores.map((s,i) => ({i,s})).sort((a,b) => b.s - a.s);
-  const r = new Array(scores.length);
-  idx.forEach((item,pos) => r[item.i] = pos + 1);
-  return r;
+
+function parseCSV(text) {
+  return text.split('\n').map(line => {
+    const cells = []; let cur = '', inQ = false;
+    for (const ch of line) {
+      if (ch === '"') inQ = !inQ;
+      else if (ch === ',' && !inQ) { cells.push(cur.trim()); cur = ''; }
+      else cur += ch;
+    }
+    cells.push(cur.trim());
+    return cells;
+  });
 }
+
+function buildIndicators(rows) {
+  const indicators = [];
+  let currentCat = '';
+  for (let r = 4; r < rows.length; r++) {
+    const row = rows[r];
+    if (!row || row.length < 5) continue;
+    const catCell = (row[0] || '').trim();
+    if (catCell) currentCat = catCell;
+    const name = (row[1] || '').trim();
+    const weight = parseFloat(row[2]);
+    const inv = (row[3] || '').trim().toUpperCase() === 'YES';
+    if (!name || !weight || weight <= 0) continue;
+    const raw = [];
+    for (let c = 4; c < 4 + MSAS.length; c++) {
+      const v = parseFloat(row[c]);
+      raw.push(isNaN(v) ? null : v);
+    }
+    indicators.push({ name, cat: currentCat, weight, invert: inv, raw });
+  }
+  return indicators;
+}
+
+function finalizeIndicators(indicators) {
+  indicators.forEach(ind => { ind.scores = minMaxNormalize(ind.raw, ind.invert); });
+  const cats = {};
+  indicators.forEach((ind, i) => { if (!cats[ind.cat]) cats[ind.cat] = []; cats[ind.cat].push(i); });
+  const attrCats = ['Demand Fundamentals', 'Market Performance'];
+  const distCats = ['Supply Risk', 'Balance & Affordability'];
+  const attrIdx = [], distIdx = [];
+  indicators.forEach((ind, i) => {
+    if (attrCats.some(c => ind.cat.includes(c) || c.includes(ind.cat))) attrIdx.push(i);
+    else if (distCats.some(c => ind.cat.includes(c) || c.includes(ind.cat))) distIdx.push(i);
+  });
+  return { indicators, cats, attrIdx, distIdx };
+}
+
+async function loadData() {
+  try {
+    const res = await fetch(SHEET_URL);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const text = await res.text();
+    const rows = parseCSV(text);
+    const raw = buildIndicators(rows);
+    if (raw.length < 5) throw new Error('Too few indicators');
+    const result = finalizeIndicators(raw);
+    INDICATORS = result.indicators; CATEGORIES = result.cats;
+    ATTR_INDICES = result.attrIdx; DIST_INDICES = result.distIdx;
+    showBadge(true);
+  } catch (err) {
+    console.warn('Sheet load failed:', err.message);
+    showBadge(false);
+    // No fallback data — show error state
+    document.getElementById('loading-overlay').innerHTML = '<div style="text-align:center"><div style="font-size:16px;margin-bottom:8px">⚠️ Could not load data</div><div style="font-size:13px;color:#90a4ae">Check that Google Sheets is published and shared publicly.</div></div>';
+    return;
+  }
+  ORIG_WEIGHTS = INDICATORS.map(d => d.weight);
+  ORIG_RANKS = rankFrom(computeScores());
+  document.getElementById('loading-overlay').style.display = 'none';
+  buildSliders(); buildChart(); buildTable();
+}
+
+function showBadge(ok) {
+  const b = document.getElementById('dataSourceBadge');
+  b.style.display = 'flex';
+  document.getElementById('sourceDot').className = 'dot' + (ok ? '' : ' fallback');
+  document.getElementById('sourceText').textContent = ok
+    ? `Live data · Last loaded ${new Date().toLocaleTimeString()}`
+    : 'Cached data (Sheets unavailable)';
+}
+
 function computeScores() {
-  return MSAS.map((_,i) => INDICATORS.reduce((sum,ind) => sum + ind.weight * ind.scores[i], 0) / 100);
+  const total = INDICATORS.reduce((s, d) => s + d.weight, 0) || 1;
+  return MSAS.map((_, mi) => INDICATORS.reduce((sum, ind) => sum + (ind.weight / total) * ind.scores[mi], 0));
 }
 function computeAttractiveness() {
-  return MSAS.map((_,mi) =>
-    ATTR_IDX.reduce((sum,i) => sum + INDICATORS[i].weight * INDICATORS[i].scores[mi], 0) / 0.5
-  );
+  const total = ATTR_INDICES.reduce((s, i) => s + INDICATORS[i].weight, 0) || 1;
+  return MSAS.map((_, mi) => ATTR_INDICES.reduce((sum, i) => sum + INDICATORS[i].weight * INDICATORS[i].scores[mi], 0) / total);
 }
 function computeDistress() {
-  return MSAS.map((_,mi) =>
-    DIST_IDX.reduce((sum,i) => sum + (100 - INDICATORS[i].scores[mi]) * INDICATORS[i].weight, 0) / 0.5
-  );
+  const total = DIST_INDICES.reduce((s, i) => s + INDICATORS[i].weight, 0) || 1;
+  return MSAS.map((_, mi) => DIST_INDICES.reduce((sum, i) => sum + (100 - INDICATORS[i].scores[mi]) * INDICATORS[i].weight, 0) / total);
 }
-function getTier(rank) {
-  return rank <= 5 ? 'Tier 1' : rank <= 18 ? 'Tier 2' : 'Tier 3';
+function rankFrom(scores) {
+  const idx = scores.map((s, i) => ({ i, s })).sort((a, b) => b.s - a.s);
+  const r = new Array(scores.length);
+  idx.forEach((item, pos) => r[item.i] = pos + 1);
+  return r;
 }
-function getColor(rank, filter) {
-  const tier = getTier(rank), top5 = rank <= 5;
-  if (filter !== 'all') {
-    const show = (filter==='top5'&&top5)||(filter==='tier2'&&tier==='Tier 2')||(filter==='tier3'&&tier==='Tier 3');
-    if (!show) return 'rgba(176,190,197,0.2)';
-  }
-  if (top5) return 'rgba(13,27,62,0.85)';
-  if (tier === 'Tier 2') return 'rgba(79,195,247,0.75)';
-  return 'rgba(176,190,197,0.55)';
-}
+function getTier(rank) { return rank <= 5 ? 'Tier 1' : rank <= 18 ? 'Tier 2' : 'Tier 3'; }
+
 function buildSliders() {
   const container = document.getElementById('sliderContainer');
   container.innerHTML = '';
@@ -242,63 +310,71 @@ function buildSliders() {
 function onSlider(idx, val) {
   INDICATORS[idx].weight = parseInt(val) / 100;
   document.getElementById('wval_' + idx).textContent = val + '%';
-  updateTotalDisplay();
-  refresh();
+  updateTotalDisplay(); refresh();
 }
 function updateTotalDisplay() {
-  const total = Math.round(INDICATORS.reduce((s,d) => s + d.weight * 100, 0));
+  const total = Math.round(INDICATORS.reduce((s, d) => s + d.weight * 100, 0));
   const el = document.getElementById('totalDisplay');
   el.textContent = total + '%';
   el.className = 'total-weight' + (total !== 100 ? ' over' : '');
 }
 function resetWeights() {
-  ORIG_WEIGHTS.forEach((w,i) => {
+  ORIG_WEIGHTS.forEach((w, i) => {
     INDICATORS[i].weight = w;
-    const s = document.getElementById('slider_'+i), v = document.getElementById('wval_'+i);
-    if (s) { s.value = Math.round(w*100); v.textContent = Math.round(w*100)+'%'; }
+    const s = document.getElementById('slider_' + i), v = document.getElementById('wval_' + i);
+    if (s) { s.value = Math.round(w * 100); v.textContent = Math.round(w * 100) + '%'; }
   });
-  updateTotalDisplay();
-  refresh();
+  updateTotalDisplay(); refresh();
 }
+
+function getColor(rank, filter) {
+  const tier = getTier(rank), top5 = rank <= 5;
+  if (filter !== 'all') {
+    const show = (filter === 'top5' && top5) || (filter === 'tier2' && tier === 'Tier 2') || (filter === 'tier3' && tier === 'Tier 3');
+    if (!show) return 'rgba(176,190,197,0.2)';
+  }
+  if (top5) return 'rgba(13,27,62,0.85)';
+  if (tier === 'Tier 2') return 'rgba(79,195,247,0.75)';
+  return 'rgba(176,190,197,0.55)';
+}
+
 function buildChart() {
+  if (!INDICATORS.length) return;
   const scores = computeScores(), attrs = computeAttractiveness(), dists = computeDistress(), ranks = rankFrom(scores);
   const ctx = document.getElementById('chart').getContext('2d');
   if (chart) chart.destroy();
   const pad = 8;
-  const xMin = Math.max(0,   Math.floor(Math.min(...attrs)) - pad);
-  const xMax = Math.min(110, Math.ceil(Math.max(...attrs))  + pad);
-  const yMin = Math.max(0,   Math.floor(Math.min(...dists)) - pad);
-  const yMax = Math.min(110, Math.ceil(Math.max(...dists))  + pad);
-  const pts = MSAS.map((msa,i) => ({
-    x: attrs[i], y: dists[i], r: Math.sqrt(INVENTORY[i]/1000)*1.5,
+  const xMin = Math.max(0, Math.floor(Math.min(...attrs)) - pad);
+  const xMax = Math.min(110, Math.ceil(Math.max(...attrs)) + pad);
+  const yMin = Math.max(0, Math.floor(Math.min(...dists)) - pad);
+  const yMax = Math.min(110, Math.ceil(Math.max(...dists)) + pad);
+  const pts = MSAS.map((msa, i) => ({
+    x: attrs[i], y: dists[i], r: Math.sqrt(INVENTORY[i] / 1000) * 1.5,
     label: msa, score: scores[i], rank: ranks[i], idx: i,
     backgroundColor: getColor(ranks[i], currentFilter),
     borderColor: ranks[i] <= 5 ? '#4fc3f7' : 'transparent',
     borderWidth: ranks[i] <= 5 ? 2 : 0,
   }));
   chart = new Chart(ctx, {
-    type: 'bubble',
-    data: { datasets: [{ data: pts, parsing: false }] },
+    type: 'bubble', data: { datasets: [{ data: pts, parsing: false }] },
     options: {
       responsive: true, maintainAspectRatio: false, animation: { duration: 300 },
       plugins: { legend: { display: false }, tooltip: { enabled: false } },
       scales: {
-        x: { min: xMin, max: xMax, grid: { color: '#f0f4f8' }, ticks: { font: { size: 10 }, color: '#a0aec0' },
-             title: { display: true, text: 'Market Attractiveness Score', color: '#a0aec0', font: { size: 11 } } },
-        y: { min: yMin, max: yMax, grid: { color: '#f0f4f8' }, ticks: { font: { size: 10 }, color: '#a0aec0' },
-             title: { display: true, text: 'Supply Distress Score', color: '#a0aec0', font: { size: 11 } } }
+        x: { min: xMin, max: xMax, grid: { color: '#f0f4f8' }, ticks: { font: { size: 10 }, color: '#a0aec0' }, title: { display: true, text: 'Market Attractiveness Score', color: '#a0aec0', font: { size: 11 } } },
+        y: { min: yMin, max: yMax, grid: { color: '#f0f4f8' }, ticks: { font: { size: 10 }, color: '#a0aec0' }, title: { display: true, text: 'Supply Distress Score', color: '#a0aec0', font: { size: 11 } } }
       },
       onHover: (event, elements) => {
         const tt = document.getElementById('tooltip');
         if (elements.length > 0) {
           const d = pts[elements[0].index];
           tt.innerHTML = `<div class="t-name">#${d.rank} ${d.label}</div>
-            <div class="t-row"><span class="t-lbl">Final Score</span><span class="t-val">${(d.score*100).toFixed(1)}</span></div>
+            <div class="t-row"><span class="t-lbl">Final Score</span><span class="t-val">${(d.score * 100).toFixed(1)}</span></div>
             <div class="t-row"><span class="t-lbl">Attractiveness</span><span class="t-val">${d.x.toFixed(1)}</span></div>
             <div class="t-row"><span class="t-lbl">Distress</span><span class="t-val">${d.y.toFixed(1)}</span></div>
             <div class="t-row"><span class="t-lbl">Inventory</span><span class="t-val">${INVENTORY[d.idx].toLocaleString()} units</span></div>`;
           tt.style.left = (event.native.clientX + 16) + 'px';
-          tt.style.top  = (event.native.clientY - 80) + 'px';
+          tt.style.top = (event.native.clientY - 80) + 'px';
           tt.style.display = 'block';
           event.native.target.style.cursor = 'pointer';
         } else {
@@ -309,16 +385,16 @@ function buildChart() {
     },
     plugins: [{
       id: 'labels',
-      afterDraw(chart) {
-        const ctx = chart.ctx;
-        pts.forEach((pt,i) => {
-          const el = chart.getDatasetMeta(0).data[i];
+      afterDraw(c) {
+        const ctx = c.ctx;
+        pts.forEach((pt, i) => {
+          const el = c.getDatasetMeta(0).data[i];
           const isTop5 = pt.rank <= 5;
-          const show = currentFilter==='all' ? isTop5 :
-            (currentFilter==='top5'&&isTop5)||(currentFilter==='tier2'&&getTier(pt.rank)==='Tier 2')||(currentFilter==='tier3'&&getTier(pt.rank)==='Tier 3');
+          const show = currentFilter === 'all' ? isTop5 :
+            (currentFilter === 'top5' && isTop5) || (currentFilter === 'tier2' && getTier(pt.rank) === 'Tier 2') || (currentFilter === 'tier3' && getTier(pt.rank) === 'Tier 3');
           if (!show) return;
           ctx.save();
-          ctx.font = `${isTop5?'700':'500'} 10.5px Segoe UI, Arial`;
+          ctx.font = `${isTop5 ? '700' : '500'} 10.5px Segoe UI, Arial`;
           ctx.fillStyle = isTop5 ? '#0d1b3e' : '#4a5568';
           ctx.textAlign = 'center';
           ctx.fillText(pt.label, el.x, el.y - el.options.radius - 5);
@@ -328,30 +404,32 @@ function buildChart() {
     }]
   });
 }
+
 function buildTable() {
+  if (!INDICATORS.length) return;
   const scores = computeScores(), attrs = computeAttractiveness(), dists = computeDistress(), ranks = rankFrom(scores);
-  const sorted = MSAS.map((msa,i) => ({msa, score:scores[i], attr:attrs[i], dist:dists[i], rank:ranks[i], origRank:ORIG_RANKS[i]})).sort((a,b) => a.rank - b.rank);
+  const sorted = MSAS.map((msa, i) => ({ msa, score: scores[i], attr: attrs[i], dist: dists[i], rank: ranks[i], origRank: ORIG_RANKS[i] })).sort((a, b) => a.rank - b.rank);
   document.getElementById('tableBody').innerHTML = sorted.map(d => {
-    const tier = getTier(d.rank), tierCls = tier==='Tier 1'?'t1':tier==='Tier 2'?'t2':'t3';
+    const tier = getTier(d.rank), tierCls = tier === 'Tier 1' ? 't1' : tier === 'Tier 2' ? 't2' : 't3';
     const barW = Math.round(d.score * 80);
     const delta = d.origRank - d.rank;
     const deltaStr = delta > 0 ? `↑${delta}` : delta < 0 ? `↓${Math.abs(delta)}` : '—';
     const deltaCls = delta > 0 ? 'up' : delta < 0 ? 'down' : 'same';
-    return `<tr class="${d.rank<=5?'top5':''}">
+    return `<tr class="${d.rank <= 5 ? 'top5' : ''}">
       <td class="rank-num">${d.rank}</td>
-      <td>${d.rank<=5?'<strong>'+d.msa+'</strong>':d.msa}</td>
-      <td><div class="score-bar-wrap"><div class="score-bar" style="width:${barW}px"></div><span>${(d.score*100).toFixed(1)}</span></div></td>
+      <td>${d.rank <= 5 ? '<strong>' + d.msa + '</strong>' : d.msa}</td>
+      <td><div class="score-bar-wrap"><div class="score-bar" style="width:${barW}px"></div><span>${(d.score * 100).toFixed(1)}</span></div></td>
       <td>${d.attr.toFixed(1)}</td><td>${d.dist.toFixed(1)}</td>
       <td><span class="tier-badge ${tierCls}">${tier}</span></td>
       <td><span class="delta ${deltaCls}">${deltaStr}</span></td>
     </tr>`;
   }).join('');
 }
+
 function setFilter(f, btn) {
   currentFilter = f;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  buildChart();
+  btn.classList.add('active'); buildChart();
 }
 function showTab(tab) {
   document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
@@ -361,7 +439,8 @@ function showTab(tab) {
   if (tab === 'chart') buildChart();
 }
 function refresh() { buildChart(); buildTable(); }
-buildSliders(); buildChart(); buildTable();
+
+loadData();
 </script>
 </body>
 </html>
