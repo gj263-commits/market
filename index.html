@@ -631,15 +631,25 @@ function buildChart() {
   const xMax = Math.min(110, Math.ceil(Math.max(...attrs)) + pad);
   const yMin = Math.max(0, Math.floor(Math.min(...dists)) - pad);
   const yMax = Math.min(110, Math.ceil(Math.max(...dists)) + pad);
-  const pts = MSAS.map((msa, i) => ({
-    x: attrs[i], y: dists[i], r: Math.sqrt(INVENTORY[i] / 1000) * 1.5,
+  // Separate metadata from chart data — Chart.js ignores r when extra props are mixed in
+  const meta = MSAS.map((msa, i) => ({
     label: msa, score: allScores[i], rank: ranks[i], idx: i,
-    backgroundColor: getColor(ranks[i], currentFilter),
-    borderColor: ranks[i] <= 5 ? '#4fc3f7' : 'transparent',
-    borderWidth: ranks[i] <= 5 ? 2 : 0,
+    x: attrs[i], y: dists[i],
   }));
+  const chartData = MSAS.map((_, i) => ({
+    x: attrs[i],
+    y: dists[i],
+    r: Math.max(5, Math.sqrt(INVENTORY[i] / 1000) * 1.5),
+  }));
+  const bgColors = MSAS.map((_, i) => getColor(ranks[i], currentFilter));
+  const borderColors = MSAS.map((_, i) => ranks[i] <= 5 ? '#4fc3f7' : 'transparent');
+  const borderWidths = MSAS.map((_, i) => ranks[i] <= 5 ? 2 : 0);
+
+  // Keep pts reference for label plugin
+  const pts = meta;
+
   chart = new Chart(ctx, {
-    type: 'bubble', data: { datasets: [{ data: pts, parsing: false }] },
+    type: 'bubble', data: { datasets: [{ data: chartData, parsing: false, backgroundColor: bgColors, borderColor: borderColors, borderWidth: borderWidths }] },
     options: {
       responsive: true, maintainAspectRatio: false, animation: { duration: 250 },
       plugins: { legend: { display: false }, tooltip: { enabled: false } },
