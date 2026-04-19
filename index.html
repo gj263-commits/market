@@ -13,63 +13,70 @@ header h1{font-size:17px;font-weight:600}
 header p{font-size:12px;color:#90a4ae;margin-top:3px}
 .logo{font-size:22px;font-weight:700;color:#4fc3f7;letter-spacing:1px}
 .body{display:flex;flex:1;overflow:hidden;height:calc(100vh - 62px)}
-.sidebar{width:300px;min-width:260px;background:white;border-right:1px solid #e2e8f0;overflow-y:auto;flex-shrink:0}
-.sidebar-header{padding:16px 20px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:white;z-index:10}
-.sidebar-header h2{font-size:13px;font-weight:700;color:#1a1a2e;text-transform:uppercase;letter-spacing:0.5px}
-.total-weight{font-size:12px;font-weight:700;padding:4px 10px;border-radius:12px;background:#ebf8ff;color:#2b6cb0}
+.sidebar{width:300px;min-width:260px;background:white;border-right:1px solid #e2e8f0;overflow-y:auto;flex-shrink:0;display:flex;flex-direction:column}
+.sidebar-header{padding:14px 16px 10px;border-bottom:1px solid #e2e8f0;position:sticky;top:0;background:white;z-index:10}
+.sidebar-header h2{font-size:12px;font-weight:700;color:#1a1a2e;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px}
+.profile-btns{display:flex;gap:5px}
+.profile-btn{flex:1;padding:7px 4px;border-radius:7px;border:1.5px solid #e2e8f0;background:white;font-size:11px;font-weight:600;cursor:pointer;text-align:center;transition:all 0.2s;color:#4a5568;line-height:1.3}
+.profile-btn.active{color:white;border-color:transparent}
+.profile-btn.core.active{background:#2b6cb0}
+.profile-btn.coreplus.active{background:#276749}
+.profile-btn.valueadd.active{background:#744210}
+.total-weight{font-size:11px;font-weight:700;padding:3px 8px;border-radius:10px;background:#ebf8ff;color:#2b6cb0;display:inline-block;margin-top:8px}
 .total-weight.over{background:#fff5f5;color:#c53030}
-.reset-btn{width:100%;padding:10px;background:#f7fafc;border:none;border-top:1px solid #e2e8f0;font-size:12px;font-weight:600;color:#4a5568;cursor:pointer;text-transform:uppercase;letter-spacing:0.5px;transition:background 0.2s}
+.reset-btn{width:100%;padding:10px;background:#f7fafc;border:none;border-top:1px solid #e2e8f0;font-size:12px;font-weight:600;color:#4a5568;cursor:pointer;text-transform:uppercase;letter-spacing:0.5px;transition:background 0.2s;flex-shrink:0}
 .reset-btn:hover{background:#edf2f7}
+.slider-area{flex:1;overflow-y:auto}
 .category-group{border-bottom:1px solid #f0f4f8}
-.category-label{padding:10px 20px 6px;font-size:11px;font-weight:700;color:#a0aec0;text-transform:uppercase;letter-spacing:0.6px;background:#fafbfc}
-.indicator-row{padding:8px 20px 10px}
-.indicator-name{font-size:12px;color:#4a5568;margin-bottom:5px;line-height:1.3}
-.slider-row{display:flex;align-items:center;gap:8px}
+.category-label{padding:10px 16px 6px;font-size:10px;font-weight:700;color:#a0aec0;text-transform:uppercase;letter-spacing:0.6px;background:#fafbfc}
+.indicator-row{padding:6px 16px 8px}
+.indicator-name{font-size:11px;color:#4a5568;margin-bottom:4px;line-height:1.3}
+.slider-row{display:flex;align-items:center;gap:6px}
 input[type=range]{flex:1;height:4px;accent-color:#0d1b3e;cursor:pointer}
-.weight-val{font-size:12px;font-weight:700;color:#0d1b3e;min-width:36px;text-align:right}
-.main{flex:1;overflow-y:auto;padding:20px 24px}
-.tabs{display:flex;gap:4px;margin-bottom:16px}
-.tab{padding:8px 18px;border-radius:8px;border:none;background:white;font-size:13px;font-weight:500;cursor:pointer;color:#718096;border:1.5px solid #e2e8f0;transition:all 0.2s}
+.weight-val{font-size:11px;font-weight:700;color:#0d1b3e;min-width:32px;text-align:right}
+.main{flex:1;overflow-y:auto;padding:16px 20px}
+.tabs{display:flex;gap:4px;margin-bottom:14px}
+.tab{padding:7px 16px;border-radius:8px;border:none;background:white;font-size:12px;font-weight:500;cursor:pointer;color:#718096;border:1.5px solid #e2e8f0;transition:all 0.2s}
 .tab.active{background:#0d1b3e;color:white;border-color:#0d1b3e}
 .panel{display:none}
 .panel.active{display:block}
-.chart-card{background:white;border-radius:12px;padding:20px 24px;box-shadow:0 1px 6px rgba(0,0,0,0.07)}
-.filter-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
-.filter-btn{padding:6px 14px;border-radius:16px;border:1.5px solid #e2e8f0;background:white;font-size:12px;cursor:pointer;transition:all 0.2s;color:#4a5568;font-weight:500}
+.chart-card{background:white;border-radius:12px;padding:18px 20px;box-shadow:0 1px 6px rgba(0,0,0,0.07)}
+.filter-row{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.filter-btn{padding:5px 12px;border-radius:14px;border:1.5px solid #e2e8f0;background:white;font-size:11px;cursor:pointer;transition:all 0.2s;color:#4a5568;font-weight:500}
 .filter-btn.active{background:#0d1b3e;color:white;border-color:#0d1b3e}
-.chart-wrap{position:relative;height:460px}
-.legend{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap}
-.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#718096}
-.legend-dot{width:10px;height:10px;border-radius:50%}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th{text-align:left;padding:8px 12px;border-bottom:2px solid #e2e8f0;color:#718096;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap}
-td{padding:9px 12px;border-bottom:1px solid #f0f4f8;transition:background 0.1s}
+.chart-wrap{position:relative;height:450px}
+.legend{display:flex;gap:14px;margin-top:10px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:4px;font-size:10px;color:#718096}
+.legend-dot{width:8px;height:8px;border-radius:50%}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:7px 10px;border-bottom:2px solid #e2e8f0;color:#718096;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid #f0f4f8;transition:background 0.1s}
 tr:hover td{background:#f7fafc}
-.rank-num{font-weight:700;color:#4a5568;width:40px}
-.score-bar-wrap{display:flex;align-items:center;gap:6px}
-.score-bar{height:6px;border-radius:3px;background:#4fc3f7;flex-shrink:0}
-.tier-badge{padding:2px 8px;border-radius:8px;font-size:10px;font-weight:700}
+.rank-num{font-weight:700;color:#4a5568;width:36px}
+.score-bar-wrap{display:flex;align-items:center;gap:5px}
+.score-bar{height:5px;border-radius:3px;background:#4fc3f7;flex-shrink:0}
+.tier-badge{padding:2px 7px;border-radius:7px;font-size:9px;font-weight:700}
 .t1{background:#fff3cd;color:#856404}
 .t2{background:#d1ecf1;color:#0c5460}
 .t3{background:#f8d7da;color:#721c24}
 .top5 td{background:#fefce8 !important}
-.delta{font-size:11px;font-weight:600}
+.delta{font-size:10px;font-weight:600}
 .delta.up{color:#38a169}
 .delta.down{color:#e53e3e}
 .delta.same{color:#a0aec0}
-.note-text{font-size:11px;color:#a0aec0;margin-top:12px;padding:12px;background:#f7fafc;border-radius:8px}
-#tooltip{position:fixed;background:#0d1b3e;color:white;padding:12px 16px;border-radius:8px;font-size:12px;pointer-events:none;display:none;z-index:999;min-width:190px;box-shadow:0 4px 20px rgba(0,0,0,0.25)}
-#tooltip .t-name{font-size:14px;font-weight:700;color:#4fc3f7;margin-bottom:8px}
-#tooltip .t-row{display:flex;justify-content:space-between;gap:16px;margin-bottom:3px}
+.note-text{font-size:10px;color:#a0aec0;margin-top:10px;padding:10px;background:#f7fafc;border-radius:6px}
+#tooltip{position:fixed;background:#0d1b3e;color:white;padding:10px 14px;border-radius:8px;font-size:11px;pointer-events:none;display:none;z-index:999;min-width:180px;box-shadow:0 4px 20px rgba(0,0,0,0.25)}
+#tooltip .t-name{font-size:13px;font-weight:700;color:#4fc3f7;margin-bottom:6px}
+#tooltip .t-row{display:flex;justify-content:space-between;gap:14px;margin-bottom:2px}
 #tooltip .t-lbl{color:#90a4ae}
 #tooltip .t-val{font-weight:600}
-#loading-overlay{position:fixed;inset:0;background:rgba(13,27,62,0.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9998;color:white;gap:16px}
-#loading-overlay .spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,0.2);border-top-color:#4fc3f7;border-radius:50%;animation:spin 0.8s linear infinite}
+#loading-overlay{position:fixed;inset:0;background:rgba(13,27,62,0.88);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9998;color:white;gap:14px}
+#loading-overlay .spinner{width:32px;height:32px;border:3px solid rgba(255,255,255,0.2);border-top-color:#4fc3f7;border-radius:50%;animation:spin 0.8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-#loading-overlay p{font-size:14px;color:#90a4ae}
-.data-source{font-size:10px;color:#a0aec0;padding:6px 12px;background:#f7fafc;border-radius:6px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
-.data-source .dot{width:6px;height:6px;border-radius:50%;background:#38a169;flex-shrink:0}
-.data-source .dot.fallback{background:#e69500}
+#loading-overlay p{font-size:13px;color:#90a4ae}
+.data-badge{font-size:10px;color:#a0aec0;padding:5px 10px;background:#f7fafc;border-radius:6px;margin-bottom:12px;display:none;align-items:center;gap:5px}
+.data-badge .dot{width:5px;height:5px;border-radius:50%;background:#38a169;flex-shrink:0}
+.data-badge .dot.warn{background:#e69500}
 </style>
 </head>
 <body>
@@ -87,12 +94,12 @@ tr:hover td{background:#f7fafc}
   </div>
 </div>
 <script>
-function checkPw() {
-  if (document.getElementById('pwInput').value === 'georgetown') {
-    document.getElementById('gate').style.display = 'none';
+function checkPw(){
+  if(document.getElementById('pwInput').value==='msb'){
+    document.getElementById('gate').style.display='none';
   } else {
-    document.getElementById('pwError').textContent = 'Incorrect password. Try again.';
-    document.getElementById('pwInput').value = '';
+    document.getElementById('pwError').textContent='Incorrect password. Try again.';
+    document.getElementById('pwInput').value='';
   }
 }
 </script>
@@ -105,7 +112,7 @@ function checkPw() {
 <header>
   <div>
     <h1>Multifamily Market Scoring — 24 MSA Analysis</h1>
-    <p>Adjust indicator weights in real time · Scores auto-recalculate</p>
+    <p>Risk-profile weighted scoring · Real-time recalculation · April 2026</p>
   </div>
   <div class="logo">PXV</div>
 </header>
@@ -113,16 +120,22 @@ function checkPw() {
 <div class="body">
   <div class="sidebar">
     <div class="sidebar-header">
-      <h2>Indicator Weights</h2>
+      <h2>Risk Profile & Weights</h2>
+      <div class="profile-btns">
+        <button class="profile-btn core" onclick="setProfile('core',this)">🏛️ Core<br><span style="font-weight:400;font-size:10px">Stability</span></button>
+        <button class="profile-btn coreplus active" onclick="setProfile('coreplus',this)">📈 Core+<br><span style="font-weight:400;font-size:10px">Growth</span></button>
+        <button class="profile-btn valueadd" onclick="setProfile('valueadd',this)">🔄 Value-Add<br><span style="font-weight:400;font-size:10px">Recovery</span></button>
+      </div>
       <div class="total-weight" id="totalDisplay">100%</div>
     </div>
-    <div id="sliderContainer"></div>
-    <button class="reset-btn" onclick="resetWeights()">↺ Reset to Original</button>
+    <div class="slider-area" id="sliderContainer"></div>
+    <button class="reset-btn" onclick="resetProfile()">↺ Reset to Profile Default</button>
   </div>
+
   <div class="main">
-    <div id="dataSourceBadge" class="data-source" style="display:none">
-      <div class="dot" id="sourceDot"></div>
-      <span id="sourceText"></span>
+    <div id="dataBadge" class="data-badge">
+      <div class="dot" id="badgeDot"></div>
+      <span id="badgeText"></span>
     </div>
     <div class="tabs">
       <button class="tab active" onclick="showTab('chart')">Market Map</button>
@@ -131,7 +144,7 @@ function checkPw() {
     <div class="panel active" id="panel-chart">
       <div class="chart-card">
         <div class="filter-row">
-          <span style="font-size:12px;font-weight:600;color:#718096;margin-right:4px">Highlight:</span>
+          <span style="font-size:11px;font-weight:600;color:#718096;margin-right:4px">Highlight:</span>
           <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
           <button class="filter-btn" onclick="setFilter('top5',this)">Top 5</button>
           <button class="filter-btn" onclick="setFilter('tier2',this)">Tier 2</button>
@@ -154,7 +167,7 @@ function checkPw() {
           </tr></thead>
           <tbody id="tableBody"></tbody>
         </table>
-        <div class="note-text">Final Score = weighted sum of normalized indicator scores. Attractiveness = Demand + Market Performance. Distress = Supply Risk + Balance & Affordability (inverted). Δ Rank = change from default weights.</div>
+        <div class="note-text">Final Score = weighted sum of normalized scores. Attractiveness = Demand + Market Performance. Distress = Supply Risk + Balance (inverted). Δ Rank = vs. Core+ default.</div>
       </div>
     </div>
   </div>
@@ -167,10 +180,58 @@ const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSBBfHE787P4J
 const MSAS = ["Southeast Florida","Orlando","Tampa","Jacksonville","Atlanta","Nashville","Charlotte","Raleigh","Northern Virginia","Suburban Maryland","Boston","Houston","Austin","Dallas","San Antonio","Phoenix","Las Vegas","Denver","Chicago","Indianapolis","Columbus","Kansas City","Charleston","Stamford"];
 const INVENTORY = [206884,238983,244738,126961,547172,186971,245561,138528,592057,592057,298251,737113,334625,923653,231768,428912,194102,320794,572359,177749,228347,182517,74646,43160];
 
-let INDICATORS = [], CATEGORIES = {}, ATTR_INDICES = [], DIST_INDICES = [];
-let ORIG_WEIGHTS = [], ORIG_RANKS = [], currentFilter = 'all', chart;
+// Risk profile weight multipliers (applied on top of sheet weights)
+// Key = indicator name substring, value = multiplier per profile
+const PROFILES = {
+  core:     { label:'Core',     focus:['Occupancy','Pipeline','Next 12M','Absorption Pace','Rent-to-Income','Forecasted'], boost:1.8, other:0.6 },
+  coreplus: { label:'Core+',    focus:['Job Growth','Market Rent','Rent-Growth Forecast','5-Year Population','In-Migration'], boost:1.8, other:0.7 },
+  valueadd: { label:'Value-Add',focus:['In-Migration','Forecasted','Occupancy','5-Year Population','Annual Demand'], boost:1.8, other:0.7 }
+};
 
-function minMaxNormalize(vals, invert) {
+let RAW_INDICATORS = [];   // from sheet, with original weights
+let INDICATORS = [];       // active (profile-adjusted weights + normalized scores)
+let CATEGORIES = {};
+let ATTR_INDICES = [], DIST_INDICES = [];
+let ORIG_WEIGHTS = [], ORIG_RANKS = [];
+let currentProfile = 'coreplus';
+let currentFilter = 'all';
+let chart;
+
+// ── CSV + PARSE ───────────────────────────────────────────────────────────────
+function parseCSV(text) {
+  return text.split('\n').map(line => {
+    const cells = []; let cur = '', inQ = false;
+    for (const ch of line) {
+      if (ch === '"') inQ = !inQ;
+      else if (ch === ',' && !inQ) { cells.push(cur.trim()); cur = ''; }
+      else cur += ch;
+    }
+    cells.push(cur.trim()); return cells;
+  });
+}
+
+function buildFromCSV(rows) {
+  const indicators = []; let cat = '';
+  for (let r = 4; r < rows.length; r++) {
+    const row = rows[r];
+    if (!row || row.length < 5) continue;
+    if (row[0].trim()) cat = row[0].trim();
+    const name = row[1].trim();
+    let weight = parseFloat(row[2]);
+    const inv = row[3].trim().toUpperCase() === 'YES';
+    if (!name || !weight || weight <= 0) continue;
+    // Handle both 0.05 and 5 formats
+    if (weight > 1) weight = weight / 100;
+    const raw = [];
+    for (let c = 4; c < 4 + MSAS.length; c++) {
+      const v = parseFloat(row[c]); raw.push(isNaN(v) ? null : v);
+    }
+    indicators.push({ name, cat, weight, invert: inv, raw });
+  }
+  return indicators;
+}
+
+function normalize(vals, invert) {
   const clean = vals.filter(v => v !== null && !isNaN(v));
   if (!clean.length) return vals.map(() => 50);
   const mn = Math.min(...clean), mx = Math.max(...clean);
@@ -182,89 +243,69 @@ function minMaxNormalize(vals, invert) {
   });
 }
 
-function parseCSV(text) {
-  return text.split('\n').map(line => {
-    const cells = []; let cur = '', inQ = false;
-    for (const ch of line) {
-      if (ch === '"') inQ = !inQ;
-      else if (ch === ',' && !inQ) { cells.push(cur.trim()); cur = ''; }
-      else cur += ch;
-    }
-    cells.push(cur.trim());
-    return cells;
+function applyProfile(profile) {
+  const P = PROFILES[profile];
+  INDICATORS = RAW_INDICATORS.map(ind => {
+    const match = P.focus.some(f => ind.name.toLowerCase().includes(f.toLowerCase()));
+    const w = ind.weight * (match ? P.boost : P.other);
+    return { ...ind, weight: parseFloat(w.toFixed(4)), scores: normalize(ind.raw, ind.invert) };
   });
-}
 
-function buildIndicators(rows) {
-  const indicators = [];
-  let currentCat = '';
-  for (let r = 4; r < rows.length; r++) {
-    const row = rows[r];
-    if (!row || row.length < 5) continue;
-    const catCell = (row[0] || '').trim();
-    if (catCell) currentCat = catCell;
-    const name = (row[1] || '').trim();
-    const weight = parseFloat(row[2]);
-    const inv = (row[3] || '').trim().toUpperCase() === 'YES';
-    if (!name || !weight || weight <= 0) continue;
-    const raw = [];
-    for (let c = 4; c < 4 + MSAS.length; c++) {
-      const v = parseFloat(row[c]);
-      raw.push(isNaN(v) ? null : v);
-    }
-    indicators.push({ name, cat: currentCat, weight, invert: inv, raw });
-  }
-  return indicators;
-}
+  // Normalize weights to sum to ~1
+  const total = INDICATORS.reduce((s, d) => s + d.weight, 0);
+  INDICATORS.forEach(d => d.weight = parseFloat((d.weight / total).toFixed(4)));
 
-function finalizeIndicators(indicators) {
-  indicators.forEach(ind => { ind.scores = minMaxNormalize(ind.raw, ind.invert); });
-  const cats = {};
-  indicators.forEach((ind, i) => { if (!cats[ind.cat]) cats[ind.cat] = []; cats[ind.cat].push(i); });
+  // Build categories
+  CATEGORIES = {};
+  INDICATORS.forEach((ind, i) => {
+    if (!CATEGORIES[ind.cat]) CATEGORIES[ind.cat] = [];
+    CATEGORIES[ind.cat].push(i);
+  });
+
   const attrCats = ['Demand Fundamentals', 'Market Performance'];
-  const distCats = ['Supply Risk', 'Balance & Affordability'];
-  const attrIdx = [], distIdx = [];
-  indicators.forEach((ind, i) => {
-    if (attrCats.some(c => ind.cat.includes(c) || c.includes(ind.cat))) attrIdx.push(i);
-    else if (distCats.some(c => ind.cat.includes(c) || c.includes(ind.cat))) distIdx.push(i);
+  const distCats = ['Supply Risk', 'Balance'];
+  ATTR_INDICES = []; DIST_INDICES = [];
+  INDICATORS.forEach((ind, i) => {
+    if (attrCats.some(c => ind.cat.includes(c))) ATTR_INDICES.push(i);
+    else if (distCats.some(c => ind.cat.includes(c))) DIST_INDICES.push(i);
   });
-  return { indicators, cats, attrIdx, distIdx };
+
+  ORIG_WEIGHTS = INDICATORS.map(d => d.weight);
 }
 
+// ── DATA LOAD ─────────────────────────────────────────────────────────────────
 async function loadData() {
   try {
     const res = await fetch(SHEET_URL);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const text = await res.text();
-    const rows = parseCSV(text);
-    const raw = buildIndicators(rows);
-    if (raw.length < 5) throw new Error('Too few indicators');
-    const result = finalizeIndicators(raw);
-    INDICATORS = result.indicators; CATEGORIES = result.cats;
-    ATTR_INDICES = result.attrIdx; DIST_INDICES = result.distIdx;
-    showBadge(true);
-  } catch (err) {
-    console.warn('Sheet load failed:', err.message);
-    showBadge(false);
-    // No fallback data — show error state
-    document.getElementById('loading-overlay').innerHTML = '<div style="text-align:center"><div style="font-size:16px;margin-bottom:8px">⚠️ Could not load data</div><div style="font-size:13px;color:#90a4ae">Check that Google Sheets is published and shared publicly.</div></div>';
+    const rows = parseCSV(await res.text());
+    RAW_INDICATORS = buildFromCSV(rows);
+    if (RAW_INDICATORS.length < 5) throw new Error('Too few indicators');
+    setBadge(true);
+  } catch(e) {
+    console.warn('Sheet load failed:', e.message);
+    setBadge(false);
+    document.getElementById('loading-overlay').innerHTML =
+      '<div style="text-align:center;padding:20px"><div style="font-size:16px;margin-bottom:8px">⚠️ Could not load data</div><div style="font-size:12px;color:#90a4ae">Make sure the Google Sheet is published publicly.</div></div>';
     return;
   }
-  ORIG_WEIGHTS = INDICATORS.map(d => d.weight);
+
+  applyProfile(currentProfile);
   ORIG_RANKS = rankFrom(computeScores());
   document.getElementById('loading-overlay').style.display = 'none';
   buildSliders(); buildChart(); buildTable();
 }
 
-function showBadge(ok) {
-  const b = document.getElementById('dataSourceBadge');
+function setBadge(ok) {
+  const b = document.getElementById('dataBadge');
   b.style.display = 'flex';
-  document.getElementById('sourceDot').className = 'dot' + (ok ? '' : ' fallback');
-  document.getElementById('sourceText').textContent = ok
-    ? `Live data · Last loaded ${new Date().toLocaleTimeString()}`
+  document.getElementById('badgeDot').className = 'dot' + (ok ? '' : ' warn');
+  document.getElementById('badgeText').textContent = ok
+    ? `Live data · ${new Date().toLocaleTimeString()}`
     : 'Cached data (Sheets unavailable)';
 }
 
+// ── SCORING ───────────────────────────────────────────────────────────────────
 function computeScores() {
   const total = INDICATORS.reduce((s, d) => s + d.weight, 0) || 1;
   return MSAS.map((_, mi) => INDICATORS.reduce((sum, ind) => sum + (ind.weight / total) * ind.scores[mi], 0));
@@ -280,11 +321,26 @@ function computeDistress() {
 function rankFrom(scores) {
   const idx = scores.map((s, i) => ({ i, s })).sort((a, b) => b.s - a.s);
   const r = new Array(scores.length);
-  idx.forEach((item, pos) => r[item.i] = pos + 1);
-  return r;
+  idx.forEach((item, pos) => r[item.i] = pos + 1); return r;
 }
 function getTier(rank) { return rank <= 5 ? 'Tier 1' : rank <= 18 ? 'Tier 2' : 'Tier 3'; }
 
+// ── PROFILE SWITCH ────────────────────────────────────────────────────────────
+function setProfile(p, btn) {
+  currentProfile = p;
+  document.querySelectorAll('.profile-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyProfile(p);
+  ORIG_RANKS = rankFrom(computeScores());
+  buildSliders(); refresh();
+}
+
+function resetProfile() {
+  applyProfile(currentProfile);
+  buildSliders(); refresh();
+}
+
+// ── SLIDERS ───────────────────────────────────────────────────────────────────
 function buildSliders() {
   const container = document.getElementById('sliderContainer');
   container.innerHTML = '';
@@ -298,46 +354,38 @@ function buildSliders() {
       row.className = 'indicator-row';
       row.innerHTML = `<div class="indicator-name">${INDICATORS[i].name}</div>
         <div class="slider-row">
-          <input type="range" min="0" max="30" step="1" value="${pct}" id="slider_${i}" oninput="onSlider(${i},this.value)">
-          <span class="weight-val" id="wval_${i}">${pct}%</span>
+          <input type="range" min="0" max="25" step="1" value="${pct}" id="sl_${i}" oninput="onSlider(${i},this.value)">
+          <span class="weight-val" id="wv_${i}">${pct}%</span>
         </div>`;
       group.appendChild(row);
     });
     container.appendChild(group);
   });
-  updateTotalDisplay();
+  updateTotal();
 }
 function onSlider(idx, val) {
   INDICATORS[idx].weight = parseInt(val) / 100;
-  document.getElementById('wval_' + idx).textContent = val + '%';
-  updateTotalDisplay(); refresh();
+  document.getElementById('wv_' + idx).textContent = val + '%';
+  updateTotal(); refresh();
 }
-function updateTotalDisplay() {
+function updateTotal() {
   const total = Math.round(INDICATORS.reduce((s, d) => s + d.weight * 100, 0));
   const el = document.getElementById('totalDisplay');
   el.textContent = total + '%';
   el.className = 'total-weight' + (total !== 100 ? ' over' : '');
 }
-function resetWeights() {
-  ORIG_WEIGHTS.forEach((w, i) => {
-    INDICATORS[i].weight = w;
-    const s = document.getElementById('slider_' + i), v = document.getElementById('wval_' + i);
-    if (s) { s.value = Math.round(w * 100); v.textContent = Math.round(w * 100) + '%'; }
-  });
-  updateTotalDisplay(); refresh();
-}
 
+// ── CHART ─────────────────────────────────────────────────────────────────────
 function getColor(rank, filter) {
   const tier = getTier(rank), top5 = rank <= 5;
   if (filter !== 'all') {
     const show = (filter === 'top5' && top5) || (filter === 'tier2' && tier === 'Tier 2') || (filter === 'tier3' && tier === 'Tier 3');
-    if (!show) return 'rgba(176,190,197,0.2)';
+    if (!show) return 'rgba(176,190,197,0.15)';
   }
   if (top5) return 'rgba(13,27,62,0.85)';
   if (tier === 'Tier 2') return 'rgba(79,195,247,0.75)';
-  return 'rgba(176,190,197,0.55)';
+  return 'rgba(176,190,197,0.5)';
 }
-
 function buildChart() {
   if (!INDICATORS.length) return;
   const scores = computeScores(), attrs = computeAttractiveness(), dists = computeDistress(), ranks = rankFrom(scores);
@@ -358,29 +406,26 @@ function buildChart() {
   chart = new Chart(ctx, {
     type: 'bubble', data: { datasets: [{ data: pts, parsing: false }] },
     options: {
-      responsive: true, maintainAspectRatio: false, animation: { duration: 300 },
+      responsive: true, maintainAspectRatio: false, animation: { duration: 250 },
       plugins: { legend: { display: false }, tooltip: { enabled: false } },
       scales: {
-        x: { min: xMin, max: xMax, grid: { color: '#f0f4f8' }, ticks: { font: { size: 10 }, color: '#a0aec0' }, title: { display: true, text: 'Market Attractiveness Score', color: '#a0aec0', font: { size: 11 } } },
-        y: { min: yMin, max: yMax, grid: { color: '#f0f4f8' }, ticks: { font: { size: 10 }, color: '#a0aec0' }, title: { display: true, text: 'Supply Distress Score', color: '#a0aec0', font: { size: 11 } } }
+        x: { min: xMin, max: xMax, grid: { color: '#f0f4f8' }, ticks: { font: { size: 10 }, color: '#a0aec0' }, title: { display: true, text: 'Market Attractiveness →', color: '#a0aec0', font: { size: 11 } } },
+        y: { min: yMin, max: yMax, grid: { color: '#f0f4f8' }, ticks: { font: { size: 10 }, color: '#a0aec0' }, title: { display: true, text: 'Supply Distress →', color: '#a0aec0', font: { size: 11 } } }
       },
       onHover: (event, elements) => {
         const tt = document.getElementById('tooltip');
         if (elements.length > 0) {
           const d = pts[elements[0].index];
           tt.innerHTML = `<div class="t-name">#${d.rank} ${d.label}</div>
-            <div class="t-row"><span class="t-lbl">Final Score</span><span class="t-val">${(d.score * 100).toFixed(1)}</span></div>
+            <div class="t-row"><span class="t-lbl">Score</span><span class="t-val">${(d.score * 100).toFixed(1)}</span></div>
             <div class="t-row"><span class="t-lbl">Attractiveness</span><span class="t-val">${d.x.toFixed(1)}</span></div>
             <div class="t-row"><span class="t-lbl">Distress</span><span class="t-val">${d.y.toFixed(1)}</span></div>
-            <div class="t-row"><span class="t-lbl">Inventory</span><span class="t-val">${INVENTORY[d.idx].toLocaleString()} units</span></div>`;
+            <div class="t-row"><span class="t-lbl">Inventory</span><span class="t-val">${INVENTORY[d.idx].toLocaleString()}</span></div>`;
           tt.style.left = (event.native.clientX + 16) + 'px';
           tt.style.top = (event.native.clientY - 80) + 'px';
           tt.style.display = 'block';
           event.native.target.style.cursor = 'pointer';
-        } else {
-          tt.style.display = 'none';
-          event.native.target.style.cursor = 'default';
-        }
+        } else { tt.style.display = 'none'; event.native.target.style.cursor = 'default'; }
       }
     },
     plugins: [{
@@ -394,7 +439,7 @@ function buildChart() {
             (currentFilter === 'top5' && isTop5) || (currentFilter === 'tier2' && getTier(pt.rank) === 'Tier 2') || (currentFilter === 'tier3' && getTier(pt.rank) === 'Tier 3');
           if (!show) return;
           ctx.save();
-          ctx.font = `${isTop5 ? '700' : '500'} 10.5px Segoe UI, Arial`;
+          ctx.font = `${isTop5 ? '700' : '500'} 10px Segoe UI, Arial`;
           ctx.fillStyle = isTop5 ? '#0d1b3e' : '#4a5568';
           ctx.textAlign = 'center';
           ctx.fillText(pt.label, el.x, el.y - el.options.radius - 5);
@@ -405,6 +450,7 @@ function buildChart() {
   });
 }
 
+// ── TABLE ─────────────────────────────────────────────────────────────────────
 function buildTable() {
   if (!INDICATORS.length) return;
   const scores = computeScores(), attrs = computeAttractiveness(), dists = computeDistress(), ranks = rankFrom(scores);
@@ -426,6 +472,7 @@ function buildTable() {
   }).join('');
 }
 
+// ── CONTROLS ──────────────────────────────────────────────────────────────────
 function setFilter(f, btn) {
   currentFilter = f;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
