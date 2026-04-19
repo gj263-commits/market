@@ -213,7 +213,11 @@ const INVENTORY = [206884,238983,244738,126961,547172,186971,245561,138528,59205
 // Inventory bonus: log-scaled, max +3pts
 const LOG_INV = INVENTORY.map(v => Math.log(v));
 const LOG_MIN = Math.min(...LOG_INV), LOG_MAX = Math.max(...LOG_INV);
-const INV_BONUS = LOG_INV.map(v => parseFloat(((v - LOG_MIN) / (LOG_MAX - LOG_MIN) * 3).toFixed(2)));
+let INV_BONUS_MAX = 8;
+function calcInvBonus() {
+  return LOG_INV.map(v => parseFloat(((v - LOG_MIN) / (LOG_MAX - LOG_MIN) * INV_BONUS_MAX).toFixed(2)));
+}
+let INV_BONUS = calcInvBonus();
 
 // ═══════════════════════════════════════════════════════
 // FIXED PROFILE WEIGHTS
@@ -528,6 +532,15 @@ function buildSliders() {
 function buildPenaltyPanel() {
   const keys = ['jobgap','recovery','prior5y','monthsabsorb','ages2534'];
   let html = '';
+  // Inventory bonus slider (institutional market size adjustment)
+  html += `<div class="pen-row">
+    <div class="pen-name" style="color:#2b6cb0;font-weight:600">📦 Inventory Bonus (max)</div>
+    <div class="pen-ctrl">
+      <input type="range" min="0" max="15" step="1" value="${INV_BONUS_MAX}" id="pn_invbonus" oninput="onInvBonus(this.value)">
+      <span class="pen-val" id="pv_invbonus" style="color:#2b6cb0">+${INV_BONUS_MAX}pt</span>
+    </div>
+  </div>
+  <div class="pen-desc" style="color:#90cdf4">Larger markets (Dallas, Atlanta, Chicago) get higher bonus. Log scale — max ${INV_BONUS_MAX}pt for Dallas, ~0pt for Stamford.</div>`;
   keys.forEach(k => {
     const v = penMag[k] || 0;
     html += `<div class="pen-row">
@@ -545,6 +558,16 @@ function onSlider(idx, val) {
   INDICATORS[idx].weight = parseInt(val) / 100;
   document.getElementById('wv_' + idx).textContent = val + '%';
   updateTotal(); refresh();
+}
+
+function onInvBonus(val) {
+  INV_BONUS_MAX = parseInt(val);
+  INV_BONUS = calcInvBonus();
+  document.getElementById('pv_invbonus').textContent = '+' + val + 'pt';
+  // Update description
+  const desc = document.querySelector('#penaltyContainer .pen-desc');
+  if (desc) desc.textContent = `Larger markets (Dallas, Atlanta, Chicago) get higher bonus. Log scale — max ${val}pt for Dallas, ~0pt for Stamford.`;
+  refresh();
 }
 
 function onPenalty(key, val) {
