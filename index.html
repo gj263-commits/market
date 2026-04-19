@@ -225,29 +225,34 @@ let INV_BONUS = calcInvBonus();
 // ═══════════════════════════════════════════════════════
 const PROFILE_WEIGHTS = {
   core: {
-    // Defensive: occupancy, supply discipline, affordability, cashflow
-    'Occupancy': 15, 'Rent-to-income': 15, 'Pipeline': 10,
-    'Next 12M': 9, 'Forecasted 1-Year': 10, 'Absorption Pace': 9,
-    'Market Rent Growth': 7, 'Rent-Growth Forecast': 4,
+    // Defensive: occupancy, supply discipline, affordability, cashflow + liquidity
+    'Occupancy': 13, 'Rent-to-income': 13, 'Pipeline': 9,
+    'Next 12M': 8, 'Forecasted 1-Year': 9, 'Absorption Pace': 8,
+    'Market Rent Growth': 6, 'Rent-Growth Forecast': 4,
     'Job Growth': 4, '5-Year Population': 3, 'In-Migration': 3,
     'Annual Demand': 2, 'Recent Annual Deliveries': 2, 'Rent Control': 3,
-    'Ages': 0
+    'Recovery Index': 8,   // HIGH recovery = liquid market = good for Defensive
+    'Ages 25-34': 3, 'Ages 20-34': 0
   },
   coreplus: {
     // Growth: job growth momentum + forward rent trajectory
-    'Job Growth': 20, 'Market Rent Growth': 14, 'Rent-Growth Forecast': 13,
-    '5-Year Population': 9, 'In-Migration': 7, 'Ages': 5,
-    'Occupancy': 5, 'Annual Demand': 3, 'Next 12M': 3,
+    'Job Growth': 18, 'Market Rent Growth': 13, 'Rent-Growth Forecast': 12,
+    '5-Year Population': 9, 'In-Migration': 7, 'Ages 25-34': 5,
+    'Occupancy': 4, 'Annual Demand': 3, 'Next 12M': 3,
     'Absorption Pace': 3, 'Rent-to-income': 4, 'Forecasted 1-Year': 4,
-    'Pipeline': 3, 'Recent Annual Deliveries': 2, 'Rent Control': 2
+    'Pipeline': 3, 'Recent Annual Deliveries': 2, 'Rent Control': 2,
+    'Recovery Index': 5,   // Some liquidity needed for deal flow
+    'Ages 20-34': 0
   },
   valueadd: {
-    // Recovery: in-migration, demand/supply, liquidity signal
+    // Recovery: distressed entry — Recovery Index = 0 (low recovery = opportunity)
     'In-Migration': 14, 'Forecasted 1-Year': 12, 'Occupancy': 10,
     '5-Year Population': 8, 'Annual Demand': 6, 'Absorption Pace': 7,
     'Market Rent Growth': 7, 'Rent-Growth Forecast': 7, 'Rent-to-income': 6,
     'Pipeline': 5, 'Job Growth': 5, 'Next 12M': 4,
-    'Recent Annual Deliveries': 2, 'Rent Control': 1, 'Ages': 2
+    'Recent Annual Deliveries': 2, 'Rent Control': 1, 'Ages 25-34': 2,
+    'Recovery Index': 0,   // Value-Add thesis: buy into distressed/illiquid markets
+    'Ages 20-34': 1
   }
 };
 
@@ -264,9 +269,11 @@ const PEN_DATA = {
 const RENTGROW25 = [-0.00505,-0.02038,-0.0251,-0.01061,-0.01155,-0.02044,-0.02185,-0.02998,-0.01489,-0.01489,0.00304,-0.00776,-0.0546,-0.0223,-0.02647,-0.02962,-0.01947,-0.03367,0.04086,-0.00397,-0.00507,0.01486,-0.00978,0.00526];
 
 const PROFILE_PEN = {
-  core:     { jobgap:2, recovery:2, prior5y:3, monthsabsorb:5, ages2534:1, jobgapThresh:0.002 },
-  coreplus: { jobgap:5, recovery:2, prior5y:4, monthsabsorb:3, ages2534:2, jobgapThresh:0.003 },
-  valueadd: { jobgap:2, recovery:10, prior5y:2, monthsabsorb:3, ages2534:2, jobgapThresh:0.002 },
+  // Recovery removed from core/coreplus — now a weighted indicator
+  core:     { jobgap:2, recovery:0, prior5y:3, monthsabsorb:5, ages2534:1, jobgapThresh:0.002 },
+  coreplus: { jobgap:5, recovery:0, prior5y:4, monthsabsorb:3, ages2534:2, jobgapThresh:0.003 },
+  // Value-Add: LOW recovery = distressed entry bonus
+  valueadd: { jobgap:2, recovery:8, prior5y:2, monthsabsorb:3, ages2534:2, jobgapThresh:0.002 },
 };
 
 // ═══════════════════════════════════════════════════════
@@ -445,11 +452,18 @@ function computePenalty(mi) {
   }
 
   const ri = PEN_DATA.recovery.vals[mi];
-  const riHi = currentProfile === 'valueadd' ? 1.1 : 1.3;
-  if (ri > riHi) adj += penMag.recovery;
-  else if (ri > (riHi + 1) / 2) adj += penMag.recovery * 0.5;
-  else if (ri < 0.5) adj -= penMag.recovery;
-  else if (ri < 0.7) adj -= penMag.recovery * 0.5;
+  if (currentProfile === 'valueadd') {
+    // Value-Add: LOW recovery = distressed market = buying opportunity → BONUS
+    if (ri < 0.4) adj += penMag.recovery;
+    else if (ri < 0.6) adj += penMag.recovery * 0.5;
+    else if (ri > 1.3) adj -= penMag.recovery * 0.5; // already recovered = less upside
+  } else {
+    // Defensive/Growth: HIGH recovery = liquid market = good for entry/exit
+    if (ri > 1.3) adj += penMag.recovery;
+    else if (ri > 1.1) adj += penMag.recovery * 0.5;
+    else if (ri < 0.5) adj -= penMag.recovery;
+    else if (ri < 0.7) adj -= penMag.recovery * 0.5;
+  }
 
   const p5 = PEN_DATA.prior5y.vals[mi], c25 = RENTGROW25[mi];
   if (p5 < 0 && c25 < 0) adj -= penMag.prior5y;
