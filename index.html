@@ -650,7 +650,7 @@ const invRange = maxInv - minInv || 1;
 const chartData = MSAS.map((_, i) => ({
   x: attrs[i],
   y: dists[i],
-  r: 8 + ((INVENTORY[i] - minInv) / invRange) * 32
+  inventory: INVENTORY[i]
 }));
   const bgColors = MSAS.map((_, i) => getColor(ranks[i], currentFilter));
   const borderColors = MSAS.map((_, i) => ranks[i] <= 5 ? '#4fc3f7' : 'transparent');
@@ -660,7 +660,22 @@ const chartData = MSAS.map((_, i) => ({
   const pts = meta;
 
   chart = new Chart(ctx, {
-    type: 'bubble', data: { datasets: [{ data: chartData, parsing: false, backgroundColor: bgColors, borderColor: borderColors, borderWidth: borderWidths }] },
+    type: 'bubble', data: {
+  datasets: [{
+    data: chartData,
+    backgroundColor: bgColors,
+    borderColor: borderColors,
+    borderWidth: borderWidths,
+    radius: (context) => {
+      const inv = context.raw.inventory || 0;
+      return 8 + ((inv - minInv) / invRange) * 32;
+    },
+    hoverRadius: (context) => {
+      const inv = context.raw.inventory || 0;
+      return 10 + ((inv - minInv) / invRange) * 34;
+    }
+  }]
+},
     options: {
       responsive: true, maintainAspectRatio: false, animation: { duration: 250 },
       plugins: { legend: { display: false }, tooltip: { enabled: false } },
