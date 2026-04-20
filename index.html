@@ -650,11 +650,15 @@ function buildChart() {
     label: msa, score: allScores[i], rank: ranks[i], idx: i,
     x: attrs[i], y: dists[i],
   }));
-  const chartData = MSAS.map((_, i) => ({
+    const minInv = Math.min(...INVENTORY);
+    const maxInv = Math.max(...INVENTORY);
+
+    const chartData = MSAS.map((_, i) => ({
     x: attrs[i],
     y: dists[i],
-    r: 6 + (INVENTORY[i] - minInv) / (maxInv - minInv) * 28,
-  }));
+    r: 6 + ((INVENTORY[i] - minInv) / (maxInv - minInv)) * 28,
+}));
+  
   const bgColors = MSAS.map((_, i) => getColor(ranks[i], currentFilter));
   const borderColors = MSAS.map((_, i) => ranks[i] <= 5 ? '#4fc3f7' : 'transparent');
   const borderWidths = MSAS.map((_, i) => ranks[i] <= 5 ? 2 : 0);
