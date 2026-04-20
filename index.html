@@ -651,12 +651,13 @@ function buildChart() {
     x: attrs[i], y: dists[i],
   }));
     const minInv = Math.min(...INVENTORY);
-    const maxInv = Math.max(...INVENTORY);
+const maxInv = Math.max(...INVENTORY);
+const invRange = maxInv - minInv || 1;
 
-    const chartData = MSAS.map((_, i) => ({
-    x: attrs[i],
-    y: dists[i],
-    r: 6 + ((INVENTORY[i] - minInv) / (maxInv - minInv)) * 28,
+const chartData = MSAS.map((_, i) => ({
+  x: attrs[i],
+  y: dists[i],
+  inventory: INVENTORY[i]
 }));
   
   const bgColors = MSAS.map((_, i) => getColor(ranks[i], currentFilter));
@@ -667,7 +668,22 @@ function buildChart() {
   const pts = meta;
 
   chart = new Chart(ctx, {
-    type: 'bubble', data: { datasets: [{ data: chartData, backgroundColor: bgColors, borderColor: borderColors, borderWidth: borderWidths }] },
+    type: 'bubble', data: {
+  datasets: [{
+    data: chartData,
+    backgroundColor: bgColors,
+    borderColor: borderColors,
+    borderWidth: borderWidths,
+    radius: (context) => {
+      const inv = context.raw.inventory || 0;
+      return 6 + ((inv - minInv) / invRange) * 28;
+    },
+    hoverRadius: (context) => {
+      const inv = context.raw.inventory || 0;
+      return 8 + ((inv - minInv) / invRange) * 30;
+    }
+  }]
+},
     options: {
       responsive: true, maintainAspectRatio: false, animation: { duration: 250 },
       plugins: { legend: { display: false }, tooltip: { enabled: false } },
