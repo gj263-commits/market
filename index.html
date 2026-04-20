@@ -225,33 +225,31 @@ let INV_BONUS = calcInvBonus();
 // ═══════════════════════════════════════════════════════
 const PROFILE_WEIGHTS = {
   core: {
-    // Defensive: occupancy, supply discipline, affordability, cashflow + liquidity
-    'Occupancy': 13, 'Rent-to-income': 13, 'Pipeline': 9,
-    'Next 12M': 8, 'Forecasted 1-Year': 9, 'Absorption Pace': 8,
-    'Market Rent Growth': 6, 'Rent-Growth Forecast': 4,
+    // Defensive: occupancy, supply discipline, affordability, cashflow
+    // Recovery Index removed → penalty only; Ages 25-34 kept as indicator
+    'Occupancy': 13, 'Rent-to-income': 13, 'Pipeline': 10,
+    'Next 12M': 9, 'Forecasted 1-Year': 10, 'Absorption Pace': 9,
+    'Market Rent Growth': 7, 'Rent-Growth Forecast': 4,
     'Job Growth': 4, '5-Year Population': 3, 'In-Migration': 3,
     'Annual Demand': 2, 'Recent Annual Deliveries': 2, 'Rent Control': 3,
-    'Recovery Index': 8,   // HIGH recovery = liquid market = good for Defensive
-    'Ages 25-34': 3, 'Ages 20-34': 0
+    'Ages 25-34': 4, 'Ages 20-34': 0
   },
   coreplus: {
     // Growth: job growth momentum + forward rent trajectory
-    'Job Growth': 18, 'Market Rent Growth': 13, 'Rent-Growth Forecast': 12,
+    'Job Growth': 20, 'Market Rent Growth': 14, 'Rent-Growth Forecast': 13,
     '5-Year Population': 9, 'In-Migration': 7, 'Ages 25-34': 5,
     'Occupancy': 4, 'Annual Demand': 3, 'Next 12M': 3,
     'Absorption Pace': 3, 'Rent-to-income': 4, 'Forecasted 1-Year': 4,
     'Pipeline': 3, 'Recent Annual Deliveries': 2, 'Rent Control': 2,
-    'Recovery Index': 5,   // Some liquidity needed for deal flow
     'Ages 20-34': 0
   },
   valueadd: {
-    // Recovery: distressed entry — Recovery Index = 0 (low recovery = opportunity)
-    'In-Migration': 14, 'Forecasted 1-Year': 12, 'Occupancy': 10,
-    '5-Year Population': 8, 'Annual Demand': 6, 'Absorption Pace': 7,
+    // Recovery: distressed entry — Recovery Index handled in penalty only
+    'In-Migration': 15, 'Forecasted 1-Year': 13, 'Occupancy': 10,
+    '5-Year Population': 8, 'Annual Demand': 7, 'Absorption Pace': 7,
     'Market Rent Growth': 7, 'Rent-Growth Forecast': 7, 'Rent-to-income': 6,
     'Pipeline': 5, 'Job Growth': 5, 'Next 12M': 4,
     'Recent Annual Deliveries': 2, 'Rent Control': 1, 'Ages 25-34': 2,
-    'Recovery Index': 0,   // Value-Add thesis: buy into distressed/illiquid markets
     'Ages 20-34': 1
   }
 };
@@ -269,11 +267,11 @@ const PEN_DATA = {
 const RENTGROW25 = [-0.00505,-0.02038,-0.0251,-0.01061,-0.01155,-0.02044,-0.02185,-0.02998,-0.01489,-0.01489,0.00304,-0.00776,-0.0546,-0.0223,-0.02647,-0.02962,-0.01947,-0.03367,0.04086,-0.00397,-0.00507,0.01486,-0.00978,0.00526];
 
 const PROFILE_PEN = {
-  // Recovery removed from core/coreplus — now a weighted indicator
-  core:     { jobgap:2, recovery:0, prior5y:3, monthsabsorb:5, ages2534:1, jobgapThresh:0.002 },
-  coreplus: { jobgap:5, recovery:0, prior5y:4, monthsabsorb:3, ages2534:2, jobgapThresh:0.003 },
-  // Value-Add: LOW recovery = distressed entry bonus
-  valueadd: { jobgap:2, recovery:8, prior5y:2, monthsabsorb:3, ages2534:2, jobgapThresh:0.002 },
+  // Ages 25-34 removed from penalty — now a weighted indicator in all profiles
+  // Recovery Index kept only in Value-Add penalty (distressed entry signal)
+  core:     { jobgap:2, recovery:0, prior5y:3, monthsabsorb:5, jobgapThresh:0.002 },
+  coreplus: { jobgap:5, recovery:0, prior5y:4, monthsabsorb:3, jobgapThresh:0.003 },
+  valueadd: { jobgap:2, recovery:8, prior5y:2, monthsabsorb:3, jobgapThresh:0.002 },
 };
 
 // ═══════════════════════════════════════════════════════
@@ -335,7 +333,7 @@ function buildFromCSV(rows) {
     if (name.toLowerCase().includes('inventory units')) {
       const invRaw = [];
       for (let c = 4; c < 4 + MSAS.length; c++) {
-        const v = parseFloat(String(row[c]).replace(/,/g, '')); invRaw.push(isNaN(v) ? null : v);
+        const v = parseFloat(row[c]); invRaw.push(isNaN(v) ? null : v);
       }
       if (invRaw.some(v => v !== null)) {
         // Update INVENTORY array from sheet
@@ -475,13 +473,7 @@ function computePenalty(mi) {
   else if (ma > 36) adj -= penMag.monthsabsorb * 0.3;
   else if (ma < 25) adj += penMag.monthsabsorb * 0.3;
 
-  const a = PEN_DATA.ages2534.vals[mi];
-  if (a !== null) {
-    if (a > 0.01) adj += penMag.ages2534;
-    else if (a > 0.005) adj += penMag.ages2534 * 0.5;
-    else if (a < -0.003) adj -= penMag.ages2534 * 0.5;
-  }
-
+  // ages2534 removed from penalty — captured as weighted indicator instead
   return parseFloat(adj.toFixed(1));
 }
 
@@ -564,7 +556,8 @@ function buildSliders() {
 }
 
 function buildPenaltyPanel() {
-  const keys = ['jobgap','recovery','prior5y','monthsabsorb','ages2534'];
+  // ages2534 removed from penalty — now a weighted indicator
+  const keys = ['jobgap','recovery','prior5y','monthsabsorb'];
   let html = '';
   // Inventory bonus slider (institutional market size adjustment)
   html += `<div class="pen-row">
@@ -650,16 +643,11 @@ function buildChart() {
     label: msa, score: allScores[i], rank: ranks[i], idx: i,
     x: attrs[i], y: dists[i],
   }));
-    const minInv = Math.min(...INVENTORY);
-const maxInv = Math.max(...INVENTORY);
-const invRange = maxInv - minInv || 1;
-
-const chartData = MSAS.map((_, i) => ({
-  x: attrs[i],
-  y: dists[i],
-  inventory: INVENTORY[i]
-}));
-  
+  const chartData = MSAS.map((_, i) => ({
+    x: attrs[i],
+    y: dists[i],
+    r: Math.max(5, Math.sqrt(INVENTORY[i] / 1000) * 1.5),
+  }));
   const bgColors = MSAS.map((_, i) => getColor(ranks[i], currentFilter));
   const borderColors = MSAS.map((_, i) => ranks[i] <= 5 ? '#4fc3f7' : 'transparent');
   const borderWidths = MSAS.map((_, i) => ranks[i] <= 5 ? 2 : 0);
@@ -668,22 +656,7 @@ const chartData = MSAS.map((_, i) => ({
   const pts = meta;
 
   chart = new Chart(ctx, {
-    type: 'bubble', data: {
-  datasets: [{
-    data: chartData,
-    backgroundColor: bgColors,
-    borderColor: borderColors,
-    borderWidth: borderWidths,
-    radius: (context) => {
-      const inv = context.raw.inventory || 0;
-      return 6 + ((inv - minInv) / invRange) * 28;
-    },
-    hoverRadius: (context) => {
-      const inv = context.raw.inventory || 0;
-      return 8 + ((inv - minInv) / invRange) * 30;
-    }
-  }]
-},
+    type: 'bubble', data: { datasets: [{ data: chartData, parsing: false, backgroundColor: bgColors, borderColor: borderColors, borderWidth: borderWidths }] },
     options: {
       responsive: true, maintainAspectRatio: false, animation: { duration: 250 },
       plugins: { legend: { display: false }, tooltip: { enabled: false } },
@@ -702,7 +675,7 @@ const chartData = MSAS.map((_, i) => ({
             <div class="tr"><span class="tl">Inv. Bonus</span><span class="tv">+${d.score.invBonus.toFixed(1)}</span></div>
             <div class="tr"><span class="tl">Attractiveness</span><span class="tv">${d.x.toFixed(1)}</span></div>
             <div class="tr"><span class="tl">Distress</span><span class="tv">${d.y.toFixed(1)}</span></div>
-            <div class="tr"><span class="tl">Inventory</span><span class="tv">${INVENTORY[d.idx].toLocaleString()} units </span></div>`;
+            <div class="tr"><span class="tl">Inventory</span><span class="tv">${INVENTORY[d.idx].toLocaleString()}</span></div>`;
           tt.style.left = (event.native.clientX + 16) + 'px';
           tt.style.top = (event.native.clientY - 100) + 'px';
           tt.style.display = 'block';
