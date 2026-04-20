@@ -333,7 +333,7 @@ function buildFromCSV(rows) {
     if (name.toLowerCase().includes('inventory units')) {
       const invRaw = [];
       for (let c = 4; c < 4 + MSAS.length; c++) {
-        const v = parseFloat(row[c]); invRaw.push(isNaN(v) ? null : v);
+        const v = parseFloat(String(row[c]).replace(/,/g, '')); invRaw.push(isNaN(v) ? null : v);
       }
       if (invRaw.some(v => v !== null)) {
         // Update INVENTORY array from sheet
@@ -643,11 +643,15 @@ function buildChart() {
     label: msa, score: allScores[i], rank: ranks[i], idx: i,
     x: attrs[i], y: dists[i],
   }));
-  const chartData = MSAS.map((_, i) => ({
-    x: attrs[i],
-    y: dists[i],
-    r: Math.max(5, Math.sqrt(INVENTORY[i] / 1000) * 1.5),
-  }));
+ const minInv = Math.min(...INVENTORY);
+const maxInv = Math.max(...INVENTORY);
+const invRange = maxInv - minInv || 1;
+
+const chartData = MSAS.map((_, i) => ({
+  x: attrs[i],
+  y: dists[i],
+  r: 8 + ((INVENTORY[i] - minInv) / invRange) * 32
+}));
   const bgColors = MSAS.map((_, i) => getColor(ranks[i], currentFilter));
   const borderColors = MSAS.map((_, i) => ranks[i] <= 5 ? '#4fc3f7' : 'transparent');
   const borderWidths = MSAS.map((_, i) => ranks[i] <= 5 ? 2 : 0);
@@ -675,7 +679,7 @@ function buildChart() {
             <div class="tr"><span class="tl">Inv. Bonus</span><span class="tv">+${d.score.invBonus.toFixed(1)}</span></div>
             <div class="tr"><span class="tl">Attractiveness</span><span class="tv">${d.x.toFixed(1)}</span></div>
             <div class="tr"><span class="tl">Distress</span><span class="tv">${d.y.toFixed(1)}</span></div>
-            <div class="tr"><span class="tl">Inventory</span><span class="tv">${INVENTORY[d.idx].toLocaleString()}</span></div>`;
+            <div class="tr"><span class="tl">Inventory</span><span class="tv">${INVENTORY[d.idx].toLocaleString()} units</span></div>`;
           tt.style.left = (event.native.clientX + 16) + 'px';
           tt.style.top = (event.native.clientY - 100) + 'px';
           tt.style.display = 'block';
