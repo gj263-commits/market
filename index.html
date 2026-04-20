@@ -667,7 +667,7 @@ function buildChart() {
   const pts = meta;
 
   chart = new Chart(ctx, {
-    type: 'bubble', data: { datasets: [{ data: chartData, parsing: false, backgroundColor: bgColors, borderColor: borderColors, borderWidth: borderWidths }] },
+    type: 'bubble', data: { datasets: [{ data: chartData, backgroundColor: bgColors, borderColor: borderColors, borderWidth: borderWidths }] },
     options: {
       responsive: true, maintainAspectRatio: false, animation: { duration: 250 },
       plugins: { legend: { display: false }, tooltip: { enabled: false } },
